@@ -170,9 +170,9 @@ if has("gui_running") || has('g:GuiLoaded')
 
   set guioptions-=T
   " set guioptions=m
-  
-  
-  " 左右のスクロールバーを消す 
+
+
+  " 左右のスクロールバーを消す
   set guioptions-=r
   set guioptions-=R
   set guioptions-=l
@@ -215,8 +215,10 @@ Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 " good looking modeline
 Plug 'itchyny/lightline.vim'
 
-" neovim版previewpopup
-Plug 'ncm2/float-preview.nvim'
+if has('nvim')
+  " neovim版previewpopup
+  Plug 'ncm2/float-preview.nvim'
+endif
 
 " emacsのimenu-listっぽいやつ
 " Plug 'preservim/tagbar'
@@ -233,6 +235,9 @@ Plug 'tpope/vim-surround'
 
 " 閉じ括弧挿入
 Plug 'jiangmiao/auto-pairs'
+
+" e sudo:%
+Plug 'vim-scripts/sudo.vim'
 
 " comments
 Plug 'tpope/vim-commentary'
@@ -294,14 +299,14 @@ if has('nvim')
     Plug 'tbodt/deoplete-tabnine', { 'do': './install.sh' }
   endif
 else
-  Plug 'zxqfl/tabnine-vim' 
+  Plug 'zxqfl/tabnine-vim'
 endif
 
 " idris
 Plug 'idris-hackers/idris-vim'
 
 " Haskell syntax highlighting
-Plug 'neovimhaskell/haskell-vim' 
+Plug 'neovimhaskell/haskell-vim'
 
 " lsp
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -329,8 +334,8 @@ let g:Hexokinase_highlighters = ['foreground']
 
 " good looking modeline
 " Plug 'itchyny/lightline.vim'
-let g:lightline = { 
-      \ 'colorscheme' : 'onehalfdark' 
+let g:lightline = {
+      \ 'colorscheme' : 'onehalfdark'
       \ }
 set noshowmode
 
@@ -349,7 +354,7 @@ set noshowmode
 " " endfunction
 
 " Vista
-let g:vista_sidebar_position='vertical topleft' 
+let g:vista_sidebar_position='vertical topleft'
 " Ensure you have installed some decent font to show these pretty symbols, then you can enable icon for the kind.
 " let g:vista#renderer#enable_icon = 1
 " The default icons can't be suitable for all the filetypes, you can extend it as you wish.
@@ -364,7 +369,7 @@ let g:vista_sidebar_position='vertical topleft'
 
 " 閉じ括弧挿入
 " Plug 'jiangmiao/auto-pairs'
-let g:AutoPairsFlyMode = 1 
+let g:AutoPairsFlyMode = 1
 
 
 " comments
@@ -413,7 +418,7 @@ endfunction
 if has('nvim')
   call denite#custom#option('_', {
         \ 'split' : 'floating',
-        \ 'vertical-preview' : v:true, 
+        \ 'vertical-preview' : v:true,
         \ 'floating-preview' : v:true,
         \ 'start_filter' : v:false
         \ })
@@ -431,7 +436,7 @@ else
   vmap t <Plug>(VTranslate)
   let g:translate_source = 'ja'
   let g:translate_target = 'en'
-  let g:translate_popup_window = 1 
+  let g:translate_popup_window = 1
 endif
 
 " jumping around the code
@@ -462,12 +467,12 @@ if has('nvim')
 endif
 
 " haskell syntax highlighting
-" Plug 'neovimhaskell/haskell-vim' 
+" Plug 'neovimhaskell/haskell-vim'
 
 
 " idris
 " Plug 'idris-hackers/idris-vim'
-let g:idris_indent_if = 2
+let g:idris_indent_if = 0
 let g:idris_indent_case = 2
 let g:idris_indent_let = 2
 let g:idris_indent_where =2
