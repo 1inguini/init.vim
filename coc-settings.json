@@ -3,7 +3,8 @@
   "coc.preferences.formatOnSaveFiletypes": [
     "json",
     "haskell",
-    "lhaskell"
+    "lhaskell",
+    "lean"
   ],
   "diagnostic.checkCurrentLine": true,
   "languageserver": {
@@ -27,6 +28,17 @@
       "settings": {
         "hlintOn": true
       }
+    },
+    "lean": {
+      "command": "npx",
+      "args": [
+        "lean-language-server",
+        "--stdio"
+      ],
+      "filetypes": [
+        "lean"
+      ],
+      "settings": {}
     }
   }
 }

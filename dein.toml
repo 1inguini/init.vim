@@ -1,0 +1,101 @@
+# the number of `=` in header is 40
+
+# The Plugin Manager
+# ========================================
+
+[[plugins]]
+repo = 'Shougo/dein.vim'
+
+# vim-plug like ui
+[[plugins]]
+repo = 'wsdjeg/dein-ui.vim'
+depends = 'dein.vim'
+
+# Colorschemes
+# ========================================
+
+[[plugins]]
+repo = 'joshdick/onedark.vim'
+on_event = 'VimEnter'
+hook_post_source = 'colorscheme onedark'
+
+# [[plugins]] repo = 'sonph/onehalf' rtp = 'vim'
+# [[plugins]] repo = 'jacoborus/tender.vim'
+# [[plugins]] repo = 'romainl/Apprentice'
+# [[plugins]] repo = 'drewtempelmeyer/palenight.vim'
+# [[plugins]] repo = 'ErichDonGubler/vim-sublime-monokai'
+
+
+# UI
+# ========================================
+
+# One terminal plugin to rule them all (eventually).
+[[plugins]]
+repo = 'LoricAndre/OneTerm.nvim'
+if = 'has("nvim")'
+
+
+# buffer switcher
+[[plugins]]
+repo = 'mihaifm/bufstop'
+
+
+# panel
+
+
+# Programming Languages
+# ========================================
+
+# Haskell
+[[plugins]]
+repo = 'neovimhaskell/haskell-vim'
+on_ft = 'haskell'
+
+# Idris
+[[plugins]]
+repo = 'idris-hackers/idris-vim'
+on_ft = 'idris'
+
+# Lean
+[[plugins]]
+repo = 'leanprover/lean.vim'
+on_ft = 'lean'
+
+# Rust
+[[plugins]]
+repo = 'rust-lang/rust.vim'
+on_ft = 'rust'
+
+# TOML.
+[[plugins]]
+repo = 'cespare/vim-toml'
+on_ft = 'toml'
+
+# fish shell
+[[plugins]]
+repo = 'dag/vim-fish'
+
+# R
+[[plugins]]
+repo = 'jalvesaq/Nvim-R'
+if = 'has("nvim")'
+rev = 'stable'
+
+
+# Miscellaneous
+# ========================================
+
+# キーバインドを表示
+[[plugins]]
+repo = 'folke/which-key.nvim'
+if = 'has("nvim")'
+
+# 現在のカーソル位置のコンテキストによって filetype を切り換える為のプラグイン
+[[plugins]]
+repo = 'osyo-manga/vim-precious'
+depends = 'context_filetype.vim'
+
+# カーソル位置のコンテキストのftを判定するライブラリ
+[[plugins]]
+repo = 'Shougo/context_filetype.vim'
+

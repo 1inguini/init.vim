@@ -3,17 +3,79 @@ if !has('nvim')
   python3 0
 endif
 
+if !exists('g:vscode')
 
 " setting
+
 "文字コードをUTF-8に設定
 set fenc=utf-8
 set encoding=utf8
+
+" reset augroup
+augroup SelectColorscheme
+  autocmd!
+augroup END
+
+" install dein.vim
+if &compatible
+  set nocompatible " Be iMproved
+endif
+
+" Required:
+if has ('nvim')
+  let g:dein_dir = stdpath('data') . '/dein'
+else
+  let g:dein_dir = '~/.vim/dein'
+endif
+
+let s:dein_repo_dir = g:dein_dir . '/repos/github.com/Shougo/dein.vim'
+
+" なければgit clone
+if !isdirectory(s:dein_repo_dir)
+  execute '!git clone https://github.com/Shougo/dein.vim' s:dein_repo_dir
+endif
+
+execute 'set runtimepath+=' . s:dein_repo_dir
+
+call dein#begin(g:dein_dir)
+
+
+" manage packages with toml
+if has('nvim')
+  let s:toml_file = stdpath('config') . '/dein.toml'
+  call dein#load_toml(s:toml_file)
+else
+  let s:toml_file = '~/.vim/dein.toml'
+  call dein#load_toml(s:toml_file)
+endif
+
+" Required:
+call dein#end()
+
+" キャッシュ作成
+call dein#save_state()
+
+" If you want to install not installed plugins on startup.
+if dein#check_install()
+  call dein#install()
+endif
+
+" remove packages
+call map(dein#check_clean(), { _, val -> delete(val, 'rf') })
+call dein#recache_runtimepath()
+call dein#recache_runtimepath()
+
+" Required:
+filetype plugin indent on
+syntax enable
+
+
 " " バックアップファイルを作らない
 " set nobackup
 set backup
 " " スワップファイルを作らない
-" set noswapfile
-set swapfile
+set noswapfile
+" set swapfile
 if has('nvim')
   execute 'set backupdir=' . stdpath('data') . '/backup'
   execute 'set directory=' . stdpath('data') . '/backup'
@@ -79,7 +141,18 @@ set wrapscan
 set hlsearch
 " ESC連打でハイライト解除
 " nnoremap <Esc><Esc> :nohlsearch<CR><Esc>
-nnoremap <Esc><Esc> :let @/ = ""<CR><Esc>
+nnoremap <silent> <Esc><Esc> :let @/ = ""<CR><Esc>
+
+
+" " insertモードから抜けたときに変換を切る
+" if executable('fcitx5')
+"    autocmd InsertLeave * :call system('fcitx5-remote -c')
+"    autocmd CmdlineLeave * :call system('fcitx5-remote -c')
+" elseif executable('fcitx')
+"    autocmd InsertLeave * :call system('fcitx-remote -c')
+"    autocmd CmdlineLeave * :call system('fcitx-remote -c')
+" endif
+
 
 " command to replace builtin commands
 " https://vim.fandom.com/wiki/Replace_a_builtin_command_using_cabbrv
@@ -94,6 +167,9 @@ command! -nargs=+ CommandCabbr call CommandCabbr(<f-args>)
 " function! s:is_specialbuffer() abort
 " " return index(s:specialfiletypes, &ft) < 0
 " endfunction
+
+" " マルチバイト文字の表示をいい感じに
+set ambiwidth=double
 
 
 " enable mouse
@@ -119,8 +195,9 @@ set wildmode=full
 " set spell
 " ignore Japanese
 set spelllang=en,cjk
-nmap z= :Denite spell<CR>
+" nmap z= :Denite spell<CR>
 
+let mapleader = "\<A-m>"
 
 " " use popup window instead of preview window
 " set completeopt=menu,popup
@@ -141,14 +218,14 @@ endif
 
 
 " C-sで保存
-noremap <C-s> :w<CR>
-nnoremap <C-s> :w<CR>
-inoremap <C-s> <ESC>:w<CR>a
+noremap <silent> <C-s> :w<CR>
+nnoremap <silent> <C-s> :w<CR>
+inoremap <silent> <C-s> <ESC>:w<CR>a
 
 
-" normal modeでEnterで一文字入力
-nnoremap <CR> i_<Esc>r
-
+" normal modeでEnterで1行入力
+nnoremap <CR> o<Esc>
+nnoremap <S-CR> o<Esc>
 
 " Esc for escaping terminal
 if has('nvim')
@@ -162,29 +239,31 @@ endif
 command! -bang BufferDeleteNoCloseWindow buffer#|bdelete<bang>#
 CommandCabbr bd BufferDeleteNoCloseWindow
 
+set colorcolumn=80,+1
+set textwidth=99
+set formatoptions=jqlt
 
-if has("gui_running") || has('g:GuiLoaded')
-  " カラースキーム
-  " color scheme koehler
-  " ダーク系のカラースキームを使う
-  " set background=dark
-  " set previewpopup=true
+" if has("gui_running") || has('g:GuiLoaded')
+" カラースキーム
+" color scheme koehler
+" ダーク系のカラースキームを使う
+" set background=dark
+" set previewpopup=true
 
-  " fonts
-  set guifontwide=NotoSansMonoCJK
-  set guifont=Inconsolata
+" fonts
+set guifontwide=NotoSansMonoCJKJP
+set guifont=Inconsolata,NotoSansMonoCJKJP
+
+set guioptions-=T
+" set guioptions=m
 
 
-  set guioptions-=T
-  " set guioptions=m
-
-
-  " 左右のスクロールバーを消す
-  set guioptions-=r
-  set guioptions-=R
-  set guioptions-=l
-  set guioptions-=L
-endif
+" 左右のスクロールバーを消す
+set guioptions-=r
+set guioptions-=R
+set guioptions-=l
+set guioptions-=L
+" endif
 
 
 let g:plug_window='topleft new'
@@ -198,13 +277,13 @@ else
 endif
 " Make sure you use single quotes
 
-" themes
-Plug 'joshdick/onedark.vim'
-Plug 'sonph/onehalf', { 'rtp': 'vim' }
-Plug 'jacoborus/tender.vim'
-Plug 'romainl/Apprentice'
-Plug 'drewtempelmeyer/palenight.vim'
-Plug 'ErichDonGubler/vim-sublime-monokai'
+" " themes
+" Plug 'joshdick/onedark.vim'
+" Plug 'sonph/onehalf', { 'rtp': 'vim' }
+" Plug 'jacoborus/tender.vim'
+" Plug 'romainl/Apprentice'
+" Plug 'drewtempelmeyer/palenight.vim'
+" Plug 'ErichDonGubler/vim-sublime-monokai'
 
 " indent guides
 Plug 'yggdroot/indentline'
@@ -231,6 +310,13 @@ endif
 " Plug 'preservim/tagbar'
 Plug 'liuchengxu/vista.vim'
 
+" ファイルにアイコンをつける
+if has('nvim')
+  Plug 'kyazdani42/nvim-web-devicons'
+else
+  Plug 'ryanoasis/vim-devicons'
+endif
+
 " . による繰り返し強化
 Plug 'tpope/vim-repeat'
 
@@ -241,7 +327,7 @@ Plug 'chaoren/vim-wordmotion'
 Plug 'tpope/vim-surround'
 
 " 閉じ括弧挿入
-Plug 'jiangmiao/auto-pairs'
+Plug 'cohama/lexima.vim'
 
 " e sudo:%
 Plug 'lambdalisue/suda.vim'
@@ -268,14 +354,14 @@ Plug 'mbbill/undotree'
 " Plug 'junegunn/fzf.vim'
 " Plug 'yuki-yano/fzf-preview.vim', { 'branch': 'release/rpc' }
 
-" denite
-if has('nvim')
-  Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
-else
-  Plug 'Shougo/denite.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
+" " denite
+" if has('nvim')
+"   Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
+" else
+"   Plug 'Shougo/denite.nvim'
+"   Plug 'roxma/nvim-yarp'
+"   Plug 'roxma/vim-hug-neovim-rpc'
+" endif
 
 " 翻訳
 if has('nvim')
@@ -313,28 +399,53 @@ Plug 'vim-scripts/vis'
 " debugger
 Plug 'puremourning/vimspector'
 
-" idris
-Plug 'idris-hackers/idris-vim'
+" " idris
+" Plug 'idris-hackers/idris-vim'
 
-" Haskell syntax highlighting
-Plug 'neovimhaskell/haskell-vim'
+" " lean
+" Plug 'leanprover/lean.vim'
+" " if has('nvim')
+" "   Plug 'Julian/lean.nvim'
+" "   Plug 'hrsh7th/nvim-compe'
+" " endif
 
-" rust
-Plug 'rust-lang/rust.vim'
+" symbols
+Plug 'arthurxavierx/vim-unicoder'
 
-" R
-Plug 'jalvesaq/Nvim-R', {'branch': 'stable'}
+" " Haskell syntax highlighting
+" Plug 'neovimhaskell/haskell-vim'
 
-" fish script
-Plug 'dag/vim-fish'
+" " rust
+" Plug 'rust-lang/rust.vim'
+
+" " R
+" Plug 'jalvesaq/Nvim-R', {'branch': 'stable'}
+
+" " fish script
+" Plug 'dag/vim-fish'
 
 " lsp
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+if has('nvim')
+  " settings for neovim's builtin lsp client
+  Plug 'neovim/nvim-lspconfig'
+  " code completion
+  Plug 'hrsh7th/nvim-compe'
+  " fuzzy-finder, something like ivy
+  " Plug 'nvim-lu/plenary.nvim'
+  " Plug 'nvim-telescope/telescope.nvim'
+else
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+endif
+
+" if has('nvim')
+" " キーバインドを表示
+"   Plug 'folke/which-key.nvim'
+" endif
 
 " Initialize plugin system
 call plug#end()
 
-colorscheme onedark
+" colorscheme onedark
 
 " color parentheses
 " Plug 'luochen1990/rainbow'
@@ -356,7 +467,7 @@ let g:Hexokinase_highlighters = ['foreground']
 " good looking modeline
 " Plug 'itchyny/lightline.vim'
 let g:lightline = {
-      \ 'colorscheme' : 'onehalfdark'
+      \ 'colorscheme' : 'one'
       \ }
 set noshowmode
 
@@ -377,7 +488,8 @@ set noshowmode
 " Vista
 let g:vista_sidebar_position='vertical topleft'
 let g:vista_sidebar_width = 15
-" Ensure you have installed some decent font to show these pretty symbols, then you can enable icon for the kind.
+" Ensure you have installed some decent font to show these pretty symbols,
+" then you can enable icon for the kind.
 let g:vista#renderer#enable_icon = 1
 " The default icons can't be suitable for all the filetypes, you can extend it as you wish.
 " let g:vista#renderer#icons = {
@@ -389,9 +501,15 @@ let g:vista#renderer#enable_icon = 1
 " Plug 'ncm2/float-preview.nvim'
 " let g:float_preview#docked = 0
 
-" 閉じ括弧挿入
-" Plug 'jiangmiao/auto-pairs'
-let g:AutoPairsFlyMode = 1
+" " 閉じ括弧挿入
+" " Plug 'jiangmiao/auto-pairs'
+" let g:AutoPairsFlyMode = 1
+
+
+" " 括弧関係
+" Plug 'tpope/vim-surround'
+let g:surround_no_insert_mappings = 1
+
 
 " e sudo:%
 " Plug 'lambdalisue/suda.vim'
@@ -419,36 +537,39 @@ inoremap <C-z> <C-G>u<C-R>
 " git
 " Plug 'tpope/vim-fugitive'
 
-" denite
-" Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
-" Define mappings
-augroup MyDenite
-  autocmd!
-  autocmd FileType denite call s:denite_my_settings()
-augroup END
-function! s:denite_my_settings() abort
-  nnoremap <silent><buffer><expr> <CR>
-  \ denite#do_map('do_action')
-  nnoremap <silent><buffer><expr> d
-  \ denite#do_map('do_action', 'delete')
-  nnoremap <silent><buffer><expr> p
-  \ denite#do_map('do_action', 'preview')
-  nnoremap <silent><buffer><expr> <Esc>
-  \ denite#do_map('quit')
-  nnoremap <silent><buffer><expr> /
-  \ denite#do_map('open_filter_buffer')
-  nnoremap <silent><buffer><expr> <Space>
-  \ denite#do_map('toggle_select').'j'
-endfunction
-" Change denite default options
-if has('nvim')
-  call denite#custom#option('_', {
-        \ 'split' : 'floating',
-        \ 'vertical-preview' : v:true,
-        \ 'floating-preview' : v:true,
-        \ 'start_filter' : v:false
-        \ })
-endif
+" " fuzzy finder, something like ivy
+" Plug 'junegunn/fzf.vim'
+
+" " denite
+" " Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' }
+" " Define mappings
+" augroup MyDenite
+"   autocmd!
+"   autocmd FileType denite call s:denite_my_settings()
+" augroup END
+" function! s:denite_my_settings() abort
+"   nnoremap <silent><buffer><expr> <CR>
+"   \ denite#do_map('do_action')
+"   nnoremap <silent><buffer><expr> d
+"   \ denite#do_map('do_action', 'delete')
+"   nnoremap <silent><buffer><expr> p
+"   \ denite#do_map('do_action', 'preview')
+"   nnoremap <silent><buffer><expr> <Esc>
+"   \ denite#do_map('quit')
+"   nnoremap <silent><buffer><expr> /
+"   \ denite#do_map('open_filter_buffer')
+"   nnoremap <silent><buffer><expr> <Space>
+"   \ denite#do_map('toggle_select').'j'
+" endfunction
+" " Change denite default options
+" if has('nvim')
+"   call denite#custom#option('_', {
+"         \ 'split' : 'floating',
+"         \ 'vertical-preview' : v:true,
+"         \ 'floating-preview' : v:true,
+"         \ 'start_filter' : v:false
+"         \ })
+" endif
 
 
 " 翻訳
@@ -468,29 +589,30 @@ endif
 " jumping around the code
 " Plug 'easymotion/vim-easymotion'
 let g:Easymotion_do_mapping = 0
-" <C-Tab>{char} to move to {char}
-map <C-Tab> <Plug>(easymotion-bd-f)
-nmap <C-Tab> <Plug>(easymotion-overwin-f)
-" " reaplace search
-map  / <Plug>(easymotion-sn)
-omap / <Plug>(easymotion-tn)
+" move to {char}
+map f <Plug>(easymotion-bd-f)
+map 2f <Plug>(easymotion-bd-f2)
+" Move to word
+map  gw <Plug>(easymotion-bd-w)
+" Move to line
+map gj <Plug>(easymotion-bd-jk)
 
 
-if has('nvim')
-" 補完
-  let g:deoplete#enable_at_startup = 1
-  " don't insert enter when confirming completion
-  let g:deoplete#on_insert_enter = v:false
-  " " <TAB>: completion.
-  " function! s:check_back_space() abort "{{{
-  "   let col = col('.') - 1
-  "   return !col || getline('.')[col - 1]  =~ '\s'
-  " endfunction"}}}
-  " inoremap <silent><expr> <TAB>
-  "       \ pumvisible() ? "\<C-n>" :
-  "       \ <SID>check_back_space() ? "\<TAB>" :
-  "       \ deoplete#manual_complete()
-endif
+" if has('nvim')
+" " 補完
+"   let g:deoplete#enable_at_startup = 1
+"   " don't insert enter when confirming completion
+"   let g:deoplete#on_insert_enter = v:false
+"   " " <TAB>: completion.
+"   " function! s:check_back_space() abort "{{{
+"   "   let col = col('.') - 1
+"   "   return !col || getline('.')[col - 1]  =~ '\s'
+"   " endfunction"}}}
+"   " inoremap <silent><expr> <TAB>
+"   "       \ pumvisible() ? "\<C-n>" :
+"   "       \ <SID>check_back_space() ? "\<TAB>" :
+"   "       \ deoplete#manual_complete()
+" endif
 
 " haskell syntax highlighting
 " Plug 'neovimhaskell/haskell-vim'
@@ -509,23 +631,209 @@ let g:idris_indent_where =2
 let g:idris_indent_do = 2
 let g:idris_indent_rewrite = 2
 
+" " lean
+" let g:compe = {}
+" let g:compe.enabled = v:true
+" let g:compe.autocomplete = v:true
+" let g:compe.debug = v:false
+" let g:compe.min_length = 1
+" let g:compe.preselect = 'enable'
+" let g:compe.throttle_time = 80
+" let g:compe.source_timeout = 200
+" let g:compe.incomplete_delay = 400
+" let g:compe.max_abbr_width = 100
+" let g:compe.max_kind_width = 100
+" let g:compe.max_menu_width = 100
+" let g:compe.documentation = v:true
 
-" coc
-" Use space d to show documentation in preview window.
-nnoremap <silent> <space>d :call <SID>show_documentation()<CR>
-" space e for codeLens action
-nmap <silent> <space>e <Plug>(coc-codelens-action)
+" let g:compe.source = {}
+" let g:compe.source.path = v:true
+" let g:compe.source.buffer = v:true
+" let g:compe.source.calc = v:true
+" let g:compe.source.nvim_lsp = v:true
+" let g:compe.source.nvim_lua = v:true
+" let g:compe.source.vsnip = v:true
+" let g:compe.source.ultisnips = v:true
 
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  elseif (coc#rpc#ready())
-    call CocActionAsync('doHover')
+
+" neovim builtin lsp client
+if has('nvim')
+
+" format on save
+autocmd BufWritePre *.hs lua vim.lsp.buf.formatting_sync(nil, 1000)
+autocmd BufWritePre *.hs.in lua vim.lsp.buf.formatting_sync(nil, 1000)
+
+autocmd BufWritePre *.elm lua vim.lsp.buf.formatting_sync(nil, 1000)
+autocmd BufWritePre *.elm.in lua vim.lsp.buf.formatting_sync(nil, 1000)
+
+" keybinds
+lua << EOF
+local nvim_lsp = require('lspconfig')
+
+-- Use an on_attach function to only map the following keys
+-- after the language server attaches to the current buffer
+local on_attach = function(client, bufnr)
+  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+  --Enable completion triggered by <c-x><c-o>
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+  -- Mappings.
+  local opts = { noremap=true, silent=true }
+
+  -- See `:help vim.lsp.*` for documentation on any of the below functions
+  buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  buf_set_keymap('n', 'gh', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('n', '<Leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<Leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  buf_set_keymap('n', '<Leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  buf_set_keymap('n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  buf_set_keymap('n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  buf_set_keymap('n', 'z=', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+  buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+  buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+  buf_set_keymap('n', '<Leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+  buf_set_keymap('n', '<Leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+end
+
+nvim_lsp.hls.setup{on_attach = on_attach}
+nvim_lsp.elmls.setup{on_attach = on_attach}
+EOF
+
+" auto completion by compe
+set completeopt=menuone,noselect
+lua << EOF
+-- Compe setup
+require'compe'.setup {
+  enabled = true;
+  autocomplete = true;
+  debug = false;
+  min_length = 1;
+  preselect = 'enable';
+  throttle_time = 80;
+  source_timeout = 200;
+  incomplete_delay = 400;
+  max_abbr_width = 100;
+  max_kind_width = 100;
+  max_menu_width = 100;
+  documentation = true;
+
+  source = {
+    path = true;
+    buffer = true;
+    calc = true;
+    nvim_lsp = true;
+  };
+}
+
+local t = function(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
+local check_back_space = function()
+    local col = vim.fn.col('.') - 1
+    if col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
+        return true
+    else
+        return false
+    end
+end
+
+-- Use (s-)tab to:
+--- move to prev/next item in completion menuone
+--- jump to prev/next snippet's placeholder
+_G.tab_complete = function()
+  if vim.fn.pumvisible() == 1 then
+    return t "<C-n>"
+  elseif check_back_space() then
+    return t "<Tab>"
   else
-    execute '!' . &keywordprg . " " . expand('<cword>')
-  endif
-endfunction
+    return vim.fn['compe#complete']()
+  end
+end
+_G.s_tab_complete = function()
+  if vim.fn.pumvisible() == 1 then
+    return t "<C-p>"
+  else
+    return t "<S-Tab>"
+  end
+end
 
+vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
+vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
+vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+
+--This line is important for auto-import
+vim.api.nvim_set_keymap('i', '<cr>', 'compe#confirm("<cr>")', { expr = true })
+vim.api.nvim_set_keymap('i', '<c-space>', 'compe#complete()', { expr = true })
+EOF
+
+" NOTE: Order is important. You can't lazy loading lexima.vim.
+let g:lexima_no_default_rules = v:true
+call lexima#set_default_rules()
+inoremap <silent><expr> <C-Space> compe#complete()
+inoremap <silent><expr> <CR>      compe#confirm(lexima#expand('<LT>CR>', 'i'))
+inoremap <silent><expr> <C-e>     compe#close('<C-e>')
+inoremap <silent><expr> <C-f>     compe#scroll({ 'delta': +4 })
+inoremap <silent><expr> <C-d>     compe#scroll({ 'delta': -4 })
+
+
+" " " fuzzy-finder,Plug 'nvim-lua/plenary.nvim'
+" " Plug 'nvim-telescope/telescope.nvim' something like ivy
+" " Find files using Telescope command-line sugar.
+" nnoremap <leader><C-f> <cmd>Telescope file_browser <cr>
+" nnoremap <leader>fg <cmd>Telescope live_grep <cr>
+" nnoremap <leader>b <cmd>Telescope buffers <cr>
+" nnoremap <leader>fh <cmd>Telescope help_tags <cr>
+" lua << EOF
+" require('telescope').setup{
+"   defaults = {
+"     sorting_strategy = "ascending",
+"     layout_strategy = "vertical",
+"     -- externalize = true,
+"     picker ={
+"       theme = "dropdown",
+"     },
+"   }
+" }
+" EOF
+
+endif
+
+
+" " coc
+" " Use space d to show documentation in preview window.
+" nnoremap <silent> <space>d :call <SID>show_documentation()<CR>
+" " space e for codeLens action
+" nmap <silent> <space>e <Plug>(coc-codelens-action)
+
+" function! s:show_documentation()
+"   if (index(['vim','help'], &filetype) >= 0)
+"     execute 'h '.expand('<cword>')
+"   elseif (coc#rpc#ready())
+"     call CocActionAsync('doHover')
+"   else
+"     execute '!' . &keywordprg . " " . expand('<cword>')
+"   endif
+" endfunction
+
+
+" " キーバインドを表示
+" Plug 'folke/which-key.nvim'
+lua << EOF
+  require("which-key").setup {
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+  }
+EOF
 
 " yank from clipboard
 set clipboard=unnamedplus
@@ -544,11 +852,11 @@ endif
 
 
 function! s:on_vim_enter() abort
-  Vista
+  " Vista
 endfunction
 
 function! s:on_vim_leave() abort
-  Vista!
+  " Vista!
 endfunction
 
 
@@ -556,7 +864,8 @@ endfunction
 augroup SessionAutocommands
   autocmd!
   autocmd VimEnter * nested call <SID>RestoreSessionWithConfirm() | call s:on_vim_enter()
-  autocmd VimLeave * call s:on_vim_leave() | SaveSession
+  autocmd VimLeave * nested call <SID>SaveSessionWithConfirm() | call s:on_vim_leave()
+  " autocmd VimLeave * call s:on_vim_leave() | SaveSession
 augroup END
 
 if has ('nvim')
@@ -574,3 +883,61 @@ function! s:RestoreSessionWithConfirm()
     execute 'RestoreSession'
   endif
 endfunction
+" Save session with confirm
+function! s:SaveSessionWithConfirm()
+  let msg = 'Do you want to save this session?'
+
+  if !argc() && confirm(msg, "&Yes\n&No", 1, 'Question') == 1
+    execute 'SaveSession'
+  endif
+endfunction
+
+
+else
+
+" ESC連打でハイライト解除
+" nnoremap <Esc><Esc> :nohlsearch<CR><Esc>
+nnoremap <silent> <Esc><Esc> :let @/ = ""<CR><Esc>
+
+" C-g を Escape の代わりに
+inoremap <C-g> <Esc>
+cnoremap <C-g> <C-C>
+
+" yank from clipboard
+set clipboard=unnamedplus
+
+let g:plug_window='topleft new'
+" Specify a directory for plugins
+" - For Neovim: stdpath('data') . '/plugged'
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin(stdpath('data') . '/plugged-vscode')
+" Make sure you use single quotes
+
+" 括弧関係
+Plug 'tpope/vim-surround'
+
+" deal with camelCase and snake_case
+Plug 'chaoren/vim-wordmotion'
+
+" jumping around the code
+Plug 'asvetliakov/vim-easymotion'
+call plug#end()
+
+" jumping around the code
+" Plug 'easymotion/vim-easymotion'
+let g:Easymotion_do_mapping = 0
+" move to {char}
+map f <Plug>(easymotion-bd-f)
+map 2f <Plug>(easymotion-bd-f2)
+" Move to word
+map  gw <Plug>(easymotion-bd-w)
+" Move to line
+map gj <Plug>(easymotion-bd-jk)
+
+" comments using vscode features
+xmap gc  <Plug>VSCodeCommentary
+nmap gc  <Plug>VSCodeCommentary
+omap gc  <Plug>VSCodeCommentary
+nmap gcc <Plug>VSCodeCommentaryLine
+
+endif
