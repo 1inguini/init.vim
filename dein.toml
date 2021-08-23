@@ -2,22 +2,39 @@
 
 # The Plugin Manager
 # ========================================
-
 [[plugins]]
 repo = 'Shougo/dein.vim'
+lazy = false
+hook_add = '''
+" for ftplugin to be updated on vinrc change
+let g:dein#auto_recache=v:true
+
+command! -nargs=1 DeinSource call dein#source(<f-args>)
+'''
 
 # vim-plug like ui
 [[plugins]]
 repo = 'wsdjeg/dein-ui.vim'
 depends = 'dein.vim'
+on_cmd = 'DeinUpdate'
+
+
+# UI
+# ========================================
 
 # Colorschemes
-# ========================================
+# ----------------------------------------
+# colorschemeの設定は on_hook = 'VimEnter' ではだめらしい
+# https://qiita.com/kawaz/items/ee725f6214f91337b42b#colorscheme-%E3%81%AF-vimenter-%E3%81%AB-nested-%E6%8C%87%E5%AE%9A%E3%81%A7%E9%81%85%E5%BB%B6%E8%A8%AD%E5%AE%9A%E3%81%99%E3%82%8B
 
 [[plugins]]
 repo = 'joshdick/onedark.vim'
-on_event = 'VimEnter'
-hook_post_source = 'colorscheme onedark'
+lazy = false
+hook_add = '''
+autocmd toml-config User * nested
+      \ set background=dark |
+      \ colorscheme onedark
+'''
 
 # [[plugins]] repo = 'sonph/onehalf' rtp = 'vim'
 # [[plugins]] repo = 'jacoborus/tender.vim'
@@ -25,77 +42,228 @@ hook_post_source = 'colorscheme onedark'
 # [[plugins]] repo = 'drewtempelmeyer/palenight.vim'
 # [[plugins]] repo = 'ErichDonGubler/vim-sublime-monokai'
 
-
-# UI
-# ========================================
-
 # One terminal plugin to rule them all (eventually).
 [[plugins]]
 repo = 'LoricAndre/OneTerm.nvim'
 if = 'has("nvim")'
 
 
-# buffer switcher
+# # nvim-tree.lua: file system explorer
+# # ----------------------------------------
+# [[plugins]]
+# repo = 'kyazdani42/nvim-tree.lua'
+# require = 'nvim-web-devicons'
+# if = 'has("nvim")'
+# hook_add = """
+# """
+
+# # for file icons
+# [[plugins]]
+# repo = 'kyazdani42/nvim-web-devicons'
+# if = 'has("nvim")'
+
+# fern.vim: file system explorer
+# ----------------------------------------
+[[plugins]]
+repo = 'lambdalisue/fern.vim'
+on_ft = 'fern'
+on_cmd = 'Fern'
+depends = [
+  'fern-renderer-nerdfont.vim',
+  'fern-git-status.vim',
+  'fern-mapping-git.vim',
+  'fern-mapping-project-top.vim',
+  'FixCursorHold.nvim',
+  ]
+hook_add = '''
+" use nerd fonts
+let g:fern#renderer = "nerdfont"
+
+function! s:fern_init() abort
+  " Perform enter in explorer style but expand in drawer style
+  nmap <buffer><expr>
+        \ <Enter>
+        \ fern#smart#drawer(
+        \   "\<Plug>(fern-open-or-expand:stay)",
+        \   "\<Plug>(fern-open-or-enter)",
+        \ )
+  nmap <buffer><expr>
+        \ <Backspace>
+        \ fern#smart#drawer(
+        \   "\<Plug>(fern-action-collapse:stay)",
+        \   "\<Plug>(fern-action-leave)",
+        \ )
+  nmap <buffer><nowait> dd <Plug>(fern-action-trash)
+  exe 'nmap <buffer><nowait> ' .  maparg('<LeftMouse>', 'n') . <Plug>(fern-my-expand-or-enter)
+endfunction
+
+autocmd toml-config Filetype fern call s:fern_init()
+'''
+
+[[plugins]]
+repo = 'lambdalisue/fern-git-status.vim'
+hook_add = '''
+" Disable the following options one by one if you encounter performance issues.
+" " Disable listing ignored files/directories
+" let g:fern_git_status#disable_ignored = 1
+" " Disable listing untracked files
+" let g:fern_git_status#disable_untracked = 1
+" " Disable listing status of submodules
+" let g:fern_git_status#disable_submodules = 1
+" " Disable listing status of directories
+" let g:fern_git_status#disable_directories = 1
+'''
+
+[[plugins]]
+repo = 'lambdalisue/fern-mapping-git.vim'
+
+[[plugins]]
+repo = 'lambdalisue/fern-mapping-project-top.vim'
+
+[[plugins]]
+repo = 'lambdalisue/fern-renderer-nerdfont.vim'
+depends = 'nerdfont.vim'
+
+[[plugins]]
+repo = 'lambdalisue/nerdfont.vim'
+
+# more snappiness for plugins using CusorHold event, such as:
+# # coc.nvim, vim-gutter, tagbar, vim-devicons, vim-polyglot, etc.
+[[plugins]]
+repo = 'antoinemadec/FixCursorHold.nvim'
+if = 'has("nvim")'
+
+
+# Buffer, Window and Tab Management
+# ========================================
+
+# Bufstop: fast buffer switching
+# ----------------------------------------
 [[plugins]]
 repo = 'mihaifm/bufstop'
-
-
-# panel
+on_cmd = ['Bufstop', 'BufstopFast']
+on_map = {n = '\<leader\>'}
+hook_add = '''
+noremap <leader>b :BufstopFast<CR>
+'''
 
 
 # Programming Languages
 # ========================================
 
 # Haskell
+# ----------------------------------------
 [[plugins]]
 repo = 'neovimhaskell/haskell-vim'
 on_ft = 'haskell'
 
 # Idris
+# ----------------------------------------
 [[plugins]]
 repo = 'idris-hackers/idris-vim'
 on_ft = 'idris'
 
 # Lean
+# ----------------------------------------
 [[plugins]]
 repo = 'leanprover/lean.vim'
 on_ft = 'lean'
 
 # Rust
+# ----------------------------------------
 [[plugins]]
 repo = 'rust-lang/rust.vim'
 on_ft = 'rust'
 
 # TOML.
+# ----------------------------------------
 [[plugins]]
 repo = 'cespare/vim-toml'
 on_ft = 'toml'
 
 # fish shell
+# ----------------------------------------
 [[plugins]]
 repo = 'dag/vim-fish'
+on_ft = 'fish'
 
 # R
+# ----------------------------------------
 [[plugins]]
 repo = 'jalvesaq/Nvim-R'
-if = 'has("nvim")'
 rev = 'stable'
+if = 'has("nvim")'
+on_ft = 'R'
 
 
 # Miscellaneous
 # ========================================
 
 # キーバインドを表示
+# [[plugins]]
+# repo = 'liuchengxu/vim-which-key'
+# lazy = false
+# if = 'has("vim")'
+
 [[plugins]]
 repo = 'folke/which-key.nvim'
 if = 'has("nvim")'
+lazy = false
+hook_add = '''
+lua << EOF
+function whichkey_conf()
+  require('which-key').setup {
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+    plugins = {
+      spelling = {
+        enabled = true, -- enabling this will show WhichKey when pressing z= to select spelling suggestions
+      },
+    },
+  }
+end
+EOF
+
+autocmd toml-config User SourceVimrcPost call v:lua.whichkey_conf()
+'''
 
 # 現在のカーソル位置のコンテキストによって filetype を切り換える為のプラグイン
 [[plugins]]
 repo = 'osyo-manga/vim-precious'
 depends = 'context_filetype.vim'
+on_ft = ['vim', 'help']
+on_map = 'u'
+hook_add = '''
+" NORMALモードのカーソル移動中に頻繁に切り替わるとうざいのでデフォは無効化しておく(helpは例外)
+let g:precious_enable_switch_CursorMoved = { '*': 0, 'help': 1, 'git': 1}
+
+" INSERTモードのON／OFFに合わせてトグル
+autocmd toml-config InsertEnter * PreciousSwitch
+autocmd toml-config InsertLeave * PreciousReset
+'''
 
 # カーソル位置のコンテキストのftを判定するライブラリ
 [[plugins]]
 repo = 'Shougo/context_filetype.vim'
+
+# Vim Setting
+# ========================================
+hook_add = '''
+set cmdwinheight=20
+'''
+
+# Filetype Specific
+# ----------------------------------------
+[ftplugin]
+_ = ''
+
+help = '''
+nnoremap <buffer> <CR> <C-]>
+nnoremap <buffer> <BS> <C-T>
+nnoremap <buffer> o /'\l\{2,\}'<CR>
+nnoremap <buffer> O ?'\l\{2,\}'<CR>
+nnoremap <buffer> s /\|\zs\S\+\ze\|<CR>
+nnoremap <buffer> S ?\|\zs\S\+\ze\|<CR>
+'''
 

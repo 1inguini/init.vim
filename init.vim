@@ -11,10 +11,12 @@ if !exists('g:vscode')
 set fenc=utf-8
 set encoding=utf8
 
+let mapleader = '\em'
+
 " reset augroup
-augroup SelectColorscheme
+augroup toml-config
   autocmd!
-augroup END
+augroup toml-config
 
 " install dein.vim
 if &compatible
@@ -39,14 +41,13 @@ execute 'set runtimepath+=' . s:dein_repo_dir
 
 call dein#begin(g:dein_dir)
 
-
 " manage packages with toml
 if has('nvim')
   let s:toml_file = stdpath('config') . '/dein.toml'
-  call dein#load_toml(s:toml_file)
+  call dein#load_toml(s:toml_file, {'lazy': 0})
 else
   let s:toml_file = '~/.vim/dein.toml'
-  call dein#load_toml(s:toml_file)
+  call dein#load_toml(s:toml_file, {'lazy': 0})
 endif
 
 " Required:
@@ -62,13 +63,23 @@ endif
 
 " remove packages
 call map(dein#check_clean(), { _, val -> delete(val, 'rf') })
-call dein#recache_runtimepath()
+
 call dein#recache_runtimepath()
 
 " Required:
 filetype plugin indent on
 syntax enable
 
+" fcitx5 (だめだった)
+" if isdirectory('/usr/share/fcitx5/lua')
+"   set runtimepath+='/usr/share/fcitx5/'
+" endif
+" augroup fcitx5
+"   autocmd!
+"   autocmd InsertEnter * lua require('fcitx').ime.setCurrentInputMethod('keyboard-jp')
+"   " autocmd InsertLeave * lua require('fcitx').setCurrentInputMethod('mozc')
+"   " autocmd vimEnter * lua require('fcitx').setCurrentInputMethod('mozc')
+" augroup END
 
 " " バックアップファイルを作らない
 " set nobackup
@@ -196,8 +207,6 @@ set wildmode=full
 " ignore Japanese
 set spelllang=en,cjk
 " nmap z= :Denite spell<CR>
-
-let mapleader = "\<A-m>"
 
 " " use popup window instead of preview window
 " set completeopt=menu,popup
@@ -588,7 +597,9 @@ endif
 
 " jumping around the code
 " Plug 'easymotion/vim-easymotion'
-let g:Easymotion_do_mapping = 0
+let g:EasyMotion_do_mapping = v:false " Disable default mappings
+" 日本語対応
+let g:EasyMotion_use_migemo = 1
 " move to {char}
 map f <Plug>(easymotion-bd-f)
 map 2f <Plug>(easymotion-bd-f2)
@@ -827,13 +838,13 @@ endif
 
 " " キーバインドを表示
 " Plug 'folke/which-key.nvim'
-lua << EOF
-  require("which-key").setup {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
-  }
-EOF
+" lua << EOF
+"   require("which-key").setup {
+"     -- your configuration comes here
+"     -- or leave it empty to use the default settings
+"     -- refer to the configuration section below
+"   }
+" EOF
 
 " yank from clipboard
 set clipboard=unnamedplus
@@ -941,3 +952,6 @@ omap gc  <Plug>VSCodeCommentary
 nmap gcc <Plug>VSCodeCommentaryLine
 
 endif
+
+" dein.tomlに書いた設定を発火
+doautocmd toml-config User SourceVimrcPost
