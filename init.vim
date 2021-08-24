@@ -1,6 +1,6 @@
 " python3を使わせるために適当にpython3を実行
 if !has('nvim')
-  python3 0
+ python3 0
 endif
 
 if !exists('g:vscode')
@@ -11,12 +11,8 @@ if !exists('g:vscode')
 set fenc=utf-8
 set encoding=utf8
 
-let mapleader = '\em'
-
-" reset augroup
-augroup toml-config
-  autocmd!
-augroup toml-config
+" set <Leader> key
+let mapleader = "\<M-m>"
 
 " install dein.vim
 if &compatible
@@ -42,6 +38,8 @@ execute 'set runtimepath+=' . s:dein_repo_dir
 call dein#begin(g:dein_dir)
 
 " manage packages with toml
+" reset augroup
+augroup toml-config | autocmd! | augroup END
 if has('nvim')
   let s:toml_file = stdpath('config') . '/dein.toml'
   call dein#load_toml(s:toml_file, {'lazy': 0})
@@ -53,9 +51,6 @@ endif
 " Required:
 call dein#end()
 
-" キャッシュ作成
-call dein#save_state()
-
 " If you want to install not installed plugins on startup.
 if dein#check_install()
   call dein#install()
@@ -64,10 +59,9 @@ endif
 " remove packages
 call map(dein#check_clean(), { _, val -> delete(val, 'rf') })
 
-call dein#recache_runtimepath()
-
 " Required:
 filetype plugin indent on
+" シンタックスハイライトの有効化
 syntax enable
 
 " fcitx5 (だめだった)
@@ -80,80 +74,6 @@ syntax enable
 "   " autocmd InsertLeave * lua require('fcitx').setCurrentInputMethod('mozc')
 "   " autocmd vimEnter * lua require('fcitx').setCurrentInputMethod('mozc')
 " augroup END
-
-" " バックアップファイルを作らない
-" set nobackup
-set backup
-" " スワップファイルを作らない
-set noswapfile
-" set swapfile
-if has('nvim')
-  execute 'set backupdir=' . stdpath('data') . '/backup'
-  execute 'set directory=' . stdpath('data') . '/backup'
-else
-  set backupdir=~/.vim/backup
-  set directory=~/.vim/backup
-endif
-" 編集中のファイルが変更されたら自動で読み直す
-set autoread
-" バッファが編集中でもその他のファイルを開けるように
-set hidden
-" 入力中のコマンドをステータスに表示する
-set showcmd
-
-
-" 見た目系
-" 行番号を表示_
-set number
-" 現在の行を強調表示
-set cursorline
-" 現在の行を強調表示（縦）
-set cursorcolumn
-" 行末の1文字先までカーソルを移動できるように
-set virtualedit=onemore
-" インデントはスマートインデント
-set smartindent
-" ビープ音を可視化
-set visualbell
-" 括弧入力時の対応する括弧を表示
-set showmatch
-" ステータスラインを常に表示
-set laststatus=2
-" コマンドラインの補完
-set wildmode=list:longest
-" 折り返し時に表示行単位での移動できるようにする
-nnoremap j gj
-nnoremap k gk
-" シンタックスハイライトの有効化
-syntax enable
-
-
-" Tab系
-" 不可視文字を可視化(タブが「▸-」と表示される)
-set list listchars=tab:\▸\-
-" Tab文字を半角スペースにする
-set expandtab
-" 行頭以外のTab文字の表示幅（スペースいくつ分）
-set tabstop=2
-" 行頭でのTab文字の表示幅
-set shiftwidth=2
-
-
-" 検索系
-" 検索文字列が小文字の場合は大文字小文字を区別なく検索する
-" set ignore case
-" 検索文字列に大文字が含まれている場合は区別して検索する
-" set smart case
-" 検索文字列入力時に順次対象文字列にヒットさせる
-set incsearch
-" 検索時に最後まで行ったら最初に戻る
-set wrapscan
-" 検索語をハイライト表示
-set hlsearch
-" ESC連打でハイライト解除
-" nnoremap <Esc><Esc> :nohlsearch<CR><Esc>
-nnoremap <silent> <Esc><Esc> :let @/ = ""<CR><Esc>
-
 
 " " insertモードから抜けたときに変換を切る
 " if executable('fcitx5')
@@ -179,78 +99,10 @@ command! -nargs=+ CommandCabbr call CommandCabbr(<f-args>)
 " " return index(s:specialfiletypes, &ft) < 0
 " endfunction
 
-" " マルチバイト文字の表示をいい感じに
-set ambiwidth=double
-
-
-" enable mouse
-set mouse=a
-
-
-" nice terminal color
-set termguicolors
-
-
-" automaticly cd to opened file
-if has('autochdir')
-  set autochdir
-endif
-
-
-" comple for command mode
-set wildmenu
-set wildmode=full
-
-
-" spellcheck
-" set spell
-" ignore Japanese
-set spelllang=en,cjk
-" nmap z= :Denite spell<CR>
-
-" " use popup window instead of preview window
-" set completeopt=menu,popup
-" set previewpopup=height:10,width:60
-
-
-" line wrap with indent
-set breakindent
-
-" terminal関係
-" shellをfishに
-set shell=fish
-if !has('nvim')
-  " :etermで現在のwindowで開く
-  command! ETerm terminal! ++curwin ++noclose
-  CommandCabbr eterm ETerm
-endif
-
-
-" C-sで保存
-noremap <silent> <C-s> :w<CR>
-nnoremap <silent> <C-s> :w<CR>
-inoremap <silent> <C-s> <ESC>:w<CR>a
-
-
-" normal modeでEnterで1行入力
-nnoremap <CR> o<Esc>
-nnoremap <S-CR> o<Esc>
-
-" Esc for escaping terminal
-if has('nvim')
-  tnoremap <Esc> <C-\><C-n>
-  tnoremap <C-\><Esc> <Esc>
-endif
-
 " :bd でwindowを閉じずに現在のbufferをdelete
 " https://stackoverflow.com/a/19620009
 " BufferDeleteNoCloseWindowでbdを置き換え
-command! -bang BufferDeleteNoCloseWindow buffer#|bdelete<bang>#
-CommandCabbr bd BufferDeleteNoCloseWindow
-
-set colorcolumn=80,+1
-set textwidth=99
-set formatoptions=jqlt
+command! -bang BD buffer#|bdelete<bang>#
 
 " if has("gui_running") || has('g:GuiLoaded')
 " カラースキーム
@@ -259,9 +111,9 @@ set formatoptions=jqlt
 " set background=dark
 " set previewpopup=true
 
-" fonts
-set guifontwide=NotoSansMonoCJKJP
-set guifont=Inconsolata,NotoSansMonoCJKJP
+" " fonts
+" set guifontwide=NotoSansMonoCJKJP
+" set guifont=Inconsolata,NotoSansMonoCJKJP
 
 set guioptions-=T
 " set guioptions=m
@@ -338,8 +190,8 @@ Plug 'tpope/vim-surround'
 " 閉じ括弧挿入
 Plug 'cohama/lexima.vim'
 
-" e sudo:%
-Plug 'lambdalisue/suda.vim'
+" " e sudo:%
+" Plug 'lambdalisue/suda.vim'
 
 " comments
 Plug 'tpope/vim-commentary'
@@ -953,5 +805,3 @@ nmap gcc <Plug>VSCodeCommentaryLine
 
 endif
 
-" dein.tomlに書いた設定を発火
-doautocmd toml-config User SourceVimrcPost

@@ -1,15 +1,245 @@
-# the number of `=` in header is 40
+
+# Vim Settings
+# ========================================
+hook_add = '''
+
+" Keybindings
+" ----------------------------------------
+
+" 端末のVimでもAltキーとC-Spaceを使えるように
+" https://thinca.hatenablog.com/entry/20101215/1292340358
+if has('unix') && !has('gui_running')
+  " Use meta keys in console.
+  function! s:use_meta_keys()  " {{{
+    for i in map(
+    \   range(char2nr('a'), char2nr('z'))
+    \ + range(char2nr('A'), char2nr('Z'))
+    \ + range(char2nr('0'), char2nr('9'))
+    \ , 'nr2char(v:val)')
+      " <ESC>O do not map because used by arrow keys.
+      if i != 'O'
+        execute 'nmap <ESC>' . i '<M-' . i . '>'
+      endif
+    endfor
+  endfunction  " }}}
+
+  call s:use_meta_keys()
+  map <NUL> <C-Space>
+  map! <NUL> <C-Space>
+endif
+
+
+" 折り返し時に表示行単位での移動できるようにする
+noremap j gj
+noremap k gk
+
+" 行末が改行を含まないようにする
+noremap $ g_
+
+" ESC連打でハイライト解除
+" nnoremap <Esc><Esc> :nohlsearch<CR><Esc>
+nnoremap <silent> <Esc><Esc> :let @/ = ""<CR><Esc>
+
+" visual / で選択中のものを検索、* でハイライト
+vnoremap / y/\V<C-R>=escape(@",'/\')<CR><CR>
+vnoremap * y/\V<C-R>=escape(@",'/\')<CR><CR><CR>
+
+
+noremap <silent> <C-s> :w<CR>
+nnoremap <silent> <C-s> :w<CR>
+inoremap <silent> <C-s> <ESC>:w<CR>a
+
+" normal modeでEnterで1行入力
+nnoremap <CR> o<Esc>
+nnoremap <S-CR> o<Esc>
+
+" Esc for escaping terminal
+if has('nvim')
+  tnoremap <Esc> <C-\><C-n>
+  tnoremap <C-\><Esc> <Esc>
+endif
+
+" Command Line Window
+" ----------------------------------------
+
+" open commandline window with :
+nnoremap : q:i
+vnoremap : q:i
+
+" make it bigger
+set cmdwinheight=20
+
+function s:cmdwin_local() abort
+
+  " search backwords with current line
+  nnoremap <buffer> / yy?<C-r>"
+
+  " close commandline window with <C-c>
+  nnoremap <buffer> <C-c> :q<CR>
+  vnoremap <buffer> <C-c> <Esc>:q<CR>
+  inoremap <buffer> <C-c> <Esc>:q<CR>
+
+  " send command with <C-Enter>
+  nnoremap <buffer> c_<CR> <C-c>
+  inoremap <buffer> c_<CR> <C-c>
+
+  " disable line numbers
+  setlocal nonumber
+
+endfunction
+autocmd toml-config CmdWinEnter * call s:cmdwin_local()
+
+
+
+" " バックアップファイルを作らない
+" set nobackup
+set backup
+" " スワップファイルを作らない
+" set noswapfile
+set swapfile
+if has('nvim')
+  execute 'set backupdir=' . stdpath('data') . '/backup'
+  execute 'set directory=' . stdpath('data') . '/backup'
+else
+  set backupdir=~/.vim/backup
+  set directory=~/.vim/backup
+endif
+
+" 編集中のファイルが変更されたら自動で読み直す
+set autoread
+" バッファが編集中でもその他のファイルを開けるように
+set hidden
+" 入力中のコマンドをステータスに表示する
+set showcmd
+
+
+" 見た目系
+" 行番号を表示_
+set number
+" 現在の行を強調表示
+set cursorline
+" 現在の行を強調表示（縦）
+set cursorcolumn
+" 行末の1文字先までカーソルを移動できるように
+set virtualedit=onemore
+" インデントはスマートインデント
+set smartindent
+" ビープ音を可視化
+set visualbell
+" 括弧入力時の対応する括弧を表示
+set showmatch
+" ステータスラインを常に表示
+set laststatus=2
+" コマンドラインの補完
+set wildmode=list:longest
+
+
+" Tab系
+" 不可視文字を可視化(タブが「▸-」と表示される)
+set list listchars=tab:\▸\-
+" Tab文字を半角スペースにする
+set expandtab
+" 行頭以外のTab文字の表示幅（スペースいくつ分）
+set tabstop=2
+" 行頭でのTab文字の表示幅
+set shiftwidth=2
+
+
+" 検索系
+" 検索文字列が小文字の場合は大文字小文字を区別なく検索する
+" set ignore case
+" 検索文字列に大文字が含まれている場合は区別して検索する
+" set smart case
+" 検索文字列入力時に順次対象文字列にヒットさせる
+set incsearch
+" 検索時に最後まで行ったら最初に戻る
+set wrapscan
+" 検索語をハイライト表示
+set hlsearch
+
+
+" " マルチバイト文字の表示をいい感じに
+set ambiwidth=double
+
+
+" enable mouse
+set mouse=a
+
+
+" nice terminal color
+set termguicolors
+
+
+" automaticly cd to opened file
+if has('autochdir')
+  set autochdir
+endif
+
+" complete for command mode
+set wildmenu
+set wildmode=full
+
+
+" spellcheck
+" set spell
+" ignore Japanese
+set spelllang=en,cjk
+
+" " use popup window instead of preview window
+" set completeopt=menu,popup
+" set previewpopup=height:10,width:60
+
+
+" line wrap with indent
+set breakindent
+
+set colorcolumn=80,+1
+set textwidth=99
+set formatoptions=jqlt
+
+
+" terminal関係
+" shellをfishに
+set shell=fish
+
+
+echo 'global hook_add loaded'
+'''
+
+# Filetype Specific
+# ----------------------------------------
+[ftplugin]
+_ = ''
+
+help = '''
+nnoremap <buffer> <CR> <C-]>
+nnoremap <buffer> <BS> <C-T>
+nnoremap <buffer> o /'\l\{2,\}'<CR>
+nnoremap <buffer> O ?'\l\{2,\}'<CR>
+nnoremap <buffer> s /\|\zs\S\+\ze\|<CR>
+nnoremap <buffer> S ?\|\zs\S\+\ze\|<CR>
+'''
+
 
 # The Plugin Manager
 # ========================================
 [[plugins]]
 repo = 'Shougo/dein.vim'
-lazy = false
+lazy = true
+on_cmd = 'DeinSource'
 hook_add = '''
-" for ftplugin to be updated on vinrc change
-let g:dein#auto_recache=v:true
+" for ftplugin to be updated on vimrc change
+let g:dein#auto_recache = v:true
+
+let s:token_file = stdpath('data') . '.dein_github_update_token'
+if filereadable(s:token_file)
+  let g:dein#install_github_api_token = readfile(s:token_file,'', 1)
+  autocmd VimEnter * call dein#check_update()
+endif
 
 command! -nargs=1 DeinSource call dein#source(<f-args>)
+
+echo 'dein.vim hook_add loaded'
 '''
 
 # vim-plug like ui
@@ -29,11 +259,13 @@ on_cmd = 'DeinUpdate'
 
 [[plugins]]
 repo = 'joshdick/onedark.vim'
-lazy = false
+lazy = true
 hook_add = '''
-autocmd toml-config User * nested
+autocmd toml-config VimEnter * nested
       \ set background=dark |
       \ colorscheme onedark
+
+echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
 # [[plugins]] repo = 'sonph/onehalf' rtp = 'vim'
@@ -54,8 +286,6 @@ if = 'has("nvim")'
 # repo = 'kyazdani42/nvim-tree.lua'
 # require = 'nvim-web-devicons'
 # if = 'has("nvim")'
-# hook_add = """
-# """
 
 # # for file icons
 # [[plugins]]
@@ -66,6 +296,7 @@ if = 'has("nvim")'
 # ----------------------------------------
 [[plugins]]
 repo = 'lambdalisue/fern.vim'
+lazy = true
 on_ft = 'fern'
 on_cmd = 'Fern'
 depends = [
@@ -77,31 +308,93 @@ depends = [
   ]
 hook_add = '''
 " use nerd fonts
-let g:fern#renderer = "nerdfont"
+let g:fern#renderer = 'nerdfont'
+
+" vertical cursorline instead of curso
+let g:fern#hide_cursor = v:true
+
+" show hidden files
+let g:fern#default_hidden = v:false
+
+" open and focus current file Fern with sl (ls command, or Sidebar Ls)
+function! FernOpenGitRepoOrCwd() abort
+  let path = finddir('.git/..', getcwd())
+  if path
+    execute 'Fern -drawer -toggle -reveal=% ' . path
+  else
+    Fern -drawer ./
+  endif
+endfunction
+nnoremap sl <CMD>call FernOpenGitRepoOrCwd()<CR>
+
 
 function! s:fern_init() abort
+
+  " disable line numbers
+  setlocal nonumber
+
+  " automaticly close if fern buffer is shown in drawer
+  augroup fern-autoclose
+    autocmd!
+    autocmd BufLeave fern://* close | autocmd!
+  augroup END
+
+  " Perform expand or collapse directory
+  nmap <buffer><expr>
+      \ <Plug>(fern-my-toggle)
+      \ fern#smart#leaf(
+      \   "\<Plug>(fern-action-collapse)",
+      \   "\<Plug>(fern-action-expand)",
+      \   "\<Plug>(fern-action-collapse)",
+      \ )
+
+  " expand directory on <Right>, collaps on <Left>
+  nmap <buffer> <Right> l
+  nmap <buffer> <Left> h
+
+  " don't go down when expanding a node
+  nmap <buffer> <Plug>(fern-action-expand) <Plug>(fern-action-expand:stay)
+
   " Perform enter in explorer style but expand in drawer style
   nmap <buffer><expr>
-        \ <Enter>
+        \ <Plug>(fern-my-open-or-toggle)
+        \ fern#smart#leaf(
+        \   "\<Plug>(fern-action-open)",
+        \   "\<Plug>(fern-my-toggle)",
+        \ )
+
+  nmap <buffer><expr>
+        \ <CR>
         \ fern#smart#drawer(
-        \   "\<Plug>(fern-open-or-expand:stay)",
+        \   "\<Plug>(fern-my-open-or-toggle)",
         \   "\<Plug>(fern-open-or-enter)",
         \ )
   nmap <buffer><expr>
-        \ <Backspace>
+        \ <BS>
         \ fern#smart#drawer(
-        \   "\<Plug>(fern-action-collapse:stay)",
+        \   "\<Plug>(fern-action-collapse)",
         \   "\<Plug>(fern-action-leave)",
         \ )
+
+  " trash on dd
   nmap <buffer><nowait> dd <Plug>(fern-action-trash)
-  exe 'nmap <buffer><nowait> ' .  maparg('<LeftMouse>', 'n') . <Plug>(fern-my-expand-or-enter)
+
+  " mouseclick as Enter
+  map <buffer><nowait> <LeftRelease> <CR>
 endfunction
 
 autocmd toml-config Filetype fern call s:fern_init()
+
+" clean leftover fern window from last session
+autocmd toml-config SessionLoadPost * silent! bdelete fern
+
+echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
 [[plugins]]
 repo = 'lambdalisue/fern-git-status.vim'
+lazy = true
+depends = 'fern.vim'
 hook_add = '''
 " Disable the following options one by one if you encounter performance issues.
 " " Disable listing ignored files/directories
@@ -112,26 +405,55 @@ hook_add = '''
 " let g:fern_git_status#disable_submodules = 1
 " " Disable listing status of directories
 " let g:fern_git_status#disable_directories = 1
+
+echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
 [[plugins]]
 repo = 'lambdalisue/fern-mapping-git.vim'
-
+lazy = true
+depends = ['fern-git-status.vim', 'fern.vim'
+]
 [[plugins]]
 repo = 'lambdalisue/fern-mapping-project-top.vim'
+lazy = true
+depends = 'fern.vim'
 
 [[plugins]]
 repo = 'lambdalisue/fern-renderer-nerdfont.vim'
-depends = 'nerdfont.vim'
+lazy = false
+depends = ['fern.vim', 'nerdfont.vim']
+hook_add = '''
+echo g:dein#plugin.name . ' hook_add loaded'
+'''
 
 [[plugins]]
 repo = 'lambdalisue/nerdfont.vim'
+lazy = true
 
 # more snappiness for plugins using CusorHold event, such as:
 # # coc.nvim, vim-gutter, tagbar, vim-devicons, vim-polyglot, etc.
 [[plugins]]
 repo = 'antoinemadec/FixCursorHold.nvim'
+lazy = true
 if = 'has("nvim")'
+
+
+# UndoTree: visualize undo-tree
+# ----------------------------------------
+[[plugins]]
+repo = 'mbbill/undotree'
+lazy = true
+hook_add = '''
+" tree at the left, diff at the under
+let g:undotree_WindowLayout = 2
+
+" focus on open
+let g:undotree_SetFocusWhenToggle = v:true
+
+echo g:dein#plugin.name . ' hook_add loaded'
+
+'''
 
 
 # Buffer, Window and Tab Management
@@ -141,10 +463,13 @@ if = 'has("nvim")'
 # ----------------------------------------
 [[plugins]]
 repo = 'mihaifm/bufstop'
+lazy = true
 on_cmd = ['Bufstop', 'BufstopFast']
-on_map = {n = '\<leader\>'}
+on_map = { n = '<Leader>b' }
 hook_add = '''
-noremap <leader>b :BufstopFast<CR>
+nnoremap <silent> <Leader>b :BufstopFast<CR>
+
+echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
 
@@ -155,64 +480,75 @@ noremap <leader>b :BufstopFast<CR>
 # ----------------------------------------
 [[plugins]]
 repo = 'neovimhaskell/haskell-vim'
-on_ft = 'haskell'
+lazy = false
+# on_ft = 'haskell'
 
 # Idris
 # ----------------------------------------
 [[plugins]]
 repo = 'idris-hackers/idris-vim'
-on_ft = 'idris'
+lazy = false
+# on_ft = 'idris'
 
 # Lean
 # ----------------------------------------
 [[plugins]]
 repo = 'leanprover/lean.vim'
-on_ft = 'lean'
+lazy = false
+# on_ft = 'lean'
 
 # Rust
 # ----------------------------------------
 [[plugins]]
 repo = 'rust-lang/rust.vim'
-on_ft = 'rust'
+lazy = false
+# on_ft = 'rust'
 
 # TOML.
 # ----------------------------------------
 [[plugins]]
 repo = 'cespare/vim-toml'
-on_ft = 'toml'
+lazy = false
+# on_ft = 'toml'
 
 # fish shell
 # ----------------------------------------
 [[plugins]]
 repo = 'dag/vim-fish'
-on_ft = 'fish'
+lazy = false
+# on_ft = 'fish'
 
 # R
 # ----------------------------------------
 [[plugins]]
 repo = 'jalvesaq/Nvim-R'
+lazy = false
 rev = 'stable'
 if = 'has("nvim")'
-on_ft = 'R'
+# on_ft = 'R'
 
 
 # Miscellaneous
 # ========================================
 
 # キーバインドを表示
-# [[plugins]]
-# repo = 'liuchengxu/vim-which-key'
-# lazy = false
-# if = 'has("vim")'
+[[plugins]]
+repo = 'liuchengxu/vim-which-key'
+lazy = false
+if = 'has("vim")'
 
 [[plugins]]
 repo = 'folke/which-key.nvim'
+lazy = true
 if = 'has("nvim")'
-lazy = false
-hook_add = '''
+augroup = 'toml-config'
+on_event = 'VimEnter'
+hook_post_source = '''
+
+noremap ? <CMD>WhichKey<CR>
+
 lua << EOF
-function whichkey_conf()
-  require('which-key').setup {
+require('which-key').setup {
     -- your configuration comes here
     -- or leave it empty to use the default settings
     -- refer to the configuration section below
@@ -222,48 +558,42 @@ function whichkey_conf()
       },
     },
   }
-end
 EOF
 
-autocmd toml-config User SourceVimrcPost call v:lua.whichkey_conf()
+echo g:dein#plugin.name . ' hook_post_source loaded'
 '''
+
+# edit with sudo
+[[plugins]]
+repo = 'lambdalisue/suda.vim'
+lazy = true
+hook_add = '''
+" clean leftover suda window from last session
+autocmd toml-config SessionLoadPost * silent! bdelete suda
+
+echo g:dein#plugin.name . ' hook_add loaded'
+'''
+
 
 # 現在のカーソル位置のコンテキストによって filetype を切り換える為のプラグイン
 [[plugins]]
 repo = 'osyo-manga/vim-precious'
+lazy = true
 depends = 'context_filetype.vim'
-on_ft = ['vim', 'help']
-on_map = 'u'
+on_ft = ['vim', 'help', 'toml']
 hook_add = '''
-" NORMALモードのカーソル移動中に頻繁に切り替わるとうざいのでデフォは無効化しておく(helpは例外)
-let g:precious_enable_switch_CursorMoved = { '*': 0, 'help': 1, 'git': 1}
+" " NORMALモードのカーソル移動中に頻繁に切り替わるとうざいのでデフォは無効化しておく(helpは例外)
+" let g:precious_enable_switch_CursorMoved = { '*': 0, 'help': 1, 'git': 1}
 
-" INSERTモードのON／OFFに合わせてトグル
-autocmd toml-config InsertEnter * PreciousSwitch
-autocmd toml-config InsertLeave * PreciousReset
+" " INSERTモードのON／OFFに合わせてトグル
+" autocmd toml-config InsertEnter * PreciousSwitch
+" autocmd toml-config InsertLeave * PreciousReset
+
+" echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
 # カーソル位置のコンテキストのftを判定するライブラリ
 [[plugins]]
 repo = 'Shougo/context_filetype.vim'
-
-# Vim Setting
-# ========================================
-hook_add = '''
-set cmdwinheight=20
-'''
-
-# Filetype Specific
-# ----------------------------------------
-[ftplugin]
-_ = ''
-
-help = '''
-nnoremap <buffer> <CR> <C-]>
-nnoremap <buffer> <BS> <C-T>
-nnoremap <buffer> o /'\l\{2,\}'<CR>
-nnoremap <buffer> O ?'\l\{2,\}'<CR>
-nnoremap <buffer> s /\|\zs\S\+\ze\|<CR>
-nnoremap <buffer> S ?\|\zs\S\+\ze\|<CR>
-'''
+lazy = false
 
