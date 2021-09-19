@@ -50,6 +50,15 @@ on_cmd = 'DeinUpdate'
 # UI
 # ========================================
 
+# Prerequisites
+# ----------------------------------------
+
+[[plugins]]
+repo = 'kyazdani42/nvim-web-devicons'
+lazy = true
+if = 'has("nvim")'
+
+
 # Colorschemes
 # ----------------------------------------
 # colorschemeの設定は on_hook = 'VimEnter' ではだめらしい
@@ -118,11 +127,6 @@ autocmd config VimEnter * nested
 # [[plugins]]
 # repo = 'kyazdani42/nvim-tree.lua'
 # require = 'nvim-web-devicons'
-# if = 'has("nvim")'
-
-# # for file icons
-# [[plugins]]
-# repo = 'kyazdani42/nvim-web-devicons'
 # if = 'has("nvim")'
 
 # # CHADTree: File Manager for Neovim, Better than NERDTree.
@@ -217,7 +221,7 @@ autocmd config VimEnter * nested
 # # use icons
 # [[plugins]]
 # repo = 'ryanoasis/vim-devicons'
-
+# lazy = true
 
 # fern.vim: file system explorer
 # ----------------------------------------
@@ -272,8 +276,8 @@ function! s:fern_init() abort
       \ )
 
   " expand directory on <Right>, collaps on <Left>
-  nmap <buffer> <Right> l
-  nmap <buffer> <Left> h
+  nmap <buffer> <Right> <Plug>(fern-action-expand)
+  nmap <buffer> <Left> <Plug>(fern-action-collapse)
 
   " don't go down when expanding a node
   nmap <buffer> <Plug>(fern-action-expand) <Plug>(fern-action-expand:stay)
@@ -327,8 +331,8 @@ function! s:fern_init() abort
   nmap <buffer> v <Plug>(fern-action-open:vsplit)
   " " xdg-open
   nmap <buffer> o <Plug>(fern-action-open:system)
-  nmap <buffer> h <Plug>(fern-action-expand)
-  nmap <buffer> l <Plug>(fern-action-collapse)
+  " nmap <buffer> h <Plug>(fern-action-expand)
+  " nmap <buffer> l <Plug>(fern-action-collapse)
 
   " Doing things with cursor
   " " reveal current file
@@ -441,6 +445,7 @@ lazy = true
 
 [[plugins]]
 repo = 'lambdalisue/glyph-palette.vim'
+lazy = true
 hook_add = '''
 " アイコンに色をつける
 augroup my-glyph-palette
@@ -591,11 +596,6 @@ EOF
 " echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
-[[plugins]]
-repo = 'kyazdani42/nvim-web-devicons'
-lazy = true
-if = 'has("nvim")'
-
 
 # Undotree: visualize undo-tree
 # ----------------------------------------
@@ -659,12 +659,17 @@ autocmd config SessionLoadPost * silent! bdelete undotree
 
 # indent guides
 [[plugins]]
-lazy = true
+lazy = false
 repo = 'yggdroot/indentline'
+hook_add = '''
+let g:indentLine_char_list = ['┊']
+
+" echo g:dein#plugin.name . ' hook_add loaded'
+'''
 
 # highlight and remode whitespaces
 [[plugins]]
-lazy = true
+lazy = false
 repo = 'ntpeters/vim-better-whitespace'
 
 # color parenthesizes
@@ -693,7 +698,7 @@ augroup config Colorschemes * RainbowToggleOn
 [[plugins]]
 repo = 'rrethy/vim-hexokinase'
 lazy = false
-build = 'make hexokinase'
+update = 'make hexokinase'
 # augroup = 'config'
 # on_event = 'VimEnter'
 hook_add = '''
@@ -903,7 +908,7 @@ lazy = true
 # deal with camelCase and snake_case
 [[plugins]]
 repo = 'chaoren/vim-wordmotion'
-lazy = true
+lazy = false
 
 # comment out things
 [[plugins]]
@@ -921,6 +926,7 @@ let g:tcomment#blank_lines = 0
 [[plugins]]
 repo = 'junegunn/vim-easy-align'
 lazy = true
+on_map = '<Plug>(LiveEasyAlign)'
 hook_add = '''
 " Start interactive EasyAlign in visual mode (e.g. vipga)
 xmap ga <Plug>(LiveEasyAlign)
@@ -1044,6 +1050,9 @@ if = 'has("nvim")'
 depends = ['lspsaga.nvim', 'trouble.nvim', 'lsp-status.nvim', 'nvim-lsp-smag', 'folding-nvim']
 augroup = 'config'
 on_event = 'VimEnter'
+hook_add = '''
+autocmd config ColorScheme * highlight link LspCodeLens Comment
+'''
 hook_post_source = '''
 lua << EOF
 local lsp = require('lspconfig')
@@ -1054,6 +1063,17 @@ local coq = require('coq')
 -- for lsp-status.nvim
 local lsp_status = require('lsp-status')
 lsp_status.register_progress()
+
+-- -- Set which codelens text levels to show
+-- local original_set_virtual_text = vim.lsp.diagnostic.set_virtual_text
+-- local set_virtual_text_custom = function(diagnostics, bufnr, client_id, sign_ns, opts)
+--     opts = opts or {}
+--     -- show all messages that are Info and above (Info, Warning, Error)
+--     opts.severity_limit = "Info"
+--     original_set_virtual_text(diagnostics, bufnr, client_id, sign_ns, opts)
+-- end
+
+-- vim.lsp.diagnostic.set_virtual_text = set_virtual_text_custom
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
@@ -1085,20 +1105,40 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
   buf_set_keymap('n', '<Leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
   buf_set_keymap('n', '<Leader>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
-
+  buf_set_keymap('n', '<Leader>l', '<Cmd>lua vim.lsp.codelens.run()<CR>', opts)
+  vim.cmd([[
+    augroup codelens
+      autocmd!
+      autocmd CursorHold,CursorHoldI,InsertLeave <buffer> lua vim.lsp.codelens.refresh()
+    augroup END
+  ]])
   lsp_status.on_attach(client, buffer)
-  require('folding').on_attach() -- ofr code folding
+  require('folding').on_attach() -- for code folding
 end
 
 lsp.hls.setup(coq.lsp_ensure_capabilities{
+
+  settings = {
+    haskell = {
+      completionSnippetsOn = false,
+    }
+  },
   on_attach = on_attach,
   capability = lsp_status.capability,
-  cmd = { "haskell-language-server-8.10.4", "--lsp" }
+  cmd = { "haskell-language-server-wrapper", "--lsp" },
 })
-lsp.elmls.setup(coq.lsp_ensure_capabilities{on_attach = on_attach, capability = lsp_status.capability})
+
+lsp.elmls.setup(coq.lsp_ensure_capabilities{
+  on_attach = on_attach,
+  capability = lsp_status.capability
+})
+
+lsp.yamlls.setup(coq.lsp_ensure_capabilities{
+  on_attach = on_attach,
+  capability = lsp_status.capability
+})
 
 EOF
-
 
 " echo g:dein#plugin.name . ' hook_add loaded'
 '''
@@ -1117,8 +1157,7 @@ autocmd config BufWritePre *.elm.in lua vim.lsp.buf.formatting_sync(nil, 1000)
 # Coq: Fast as FUCK nvim completion.
 # ----------------------------------------
 [[plugins]]
-repo = 'zeertzjq/coq_nvim'
-rev = 'compl-mode'
+repo = 'ms-jpq/coq_nvim'
 post_update = 'COQdeps'
 if = 'has("nvim")'
 lazy = false
@@ -1256,6 +1295,11 @@ lazy = false
 # hook_add = '''
 # " echo g:dein#plugin.name . ' hook_add loaded'
 # '''
+
+[[plugins]]
+repo = 'tpope/vim-fugitive'
+lazy = true
+on_cmd = 'Git'
 
 [[plugins]]
 repo = 'TimUntersberger/neogit'

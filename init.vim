@@ -59,9 +59,9 @@ map <unique> U <S-Up>
 map <unique> K <S-Right>
 map <unique> <C-u> <C-Up>
 map <unique> <C-k> <C-Right>
+map <unique> <C-j> <C-Down>
 " nnoremap <S-Down> J
-" nmap h <Left>
-" nmap <unique> k <Right>
+nmap h <Left>
 nnoremap <unique> <C-w>u <C-w>k
 nnoremap <unique> <C-w>k <C-w>l
 nnoremap <unique> <C-w>U <C-w>K
@@ -73,6 +73,10 @@ noremap <unique> L U
 noremap <Up> g<Up>
 noremap <Down> g<Down>
 
+" <C-Up|Down>でページめくり
+nnoremap <unique> <C-Up> <C-u>
+nnoremap <unique> <C-Down> <C-d>
+
 " " 行末が改行を含まないようにする
 " noremap $ g_
 
@@ -82,15 +86,12 @@ noremap P "+p
 
 " ESC連打でハイライト解除
 " nnoremap <Esc><Esc> <CMD>nohlsearch<CR><Esc>
-nnoremap <unique><silent> <Esc> <CMD>cclose <BAR> let @/ = ''<CR>
-nnoremap <unique><silent> qc <CMD>cclose<CR>
+nnoremap <unique><silent> <Esc> <CMD>let @/ = '' <BAR> cclose<CR>
 
 " visual / で選択中のものを検索、* でハイライト
 vnoremap / y/\V<C-R>=escape(@",'/\')<CR><CR>
 vnoremap * y/\V<C-R>=escape(@",'/\')<CR><CR><CR>
-
-nnoremap <unique> n <CMD>cnext<CR>
-nnoremap <unique> N <CMD>cprevious<CR>
+nnoremap * */<Up><CR>
 
 " C-s で保存、ついでに再描画
 nnoremap <silent> <C-s> <CMD>w<CR>
@@ -105,6 +106,8 @@ if has('nvim')
   tnoremap <Esc> <C-\><C-n>
   tnoremap <C-\><Esc> <Esc>
 endif
+
+inoremap <C-v>u <C-r>=nr2char(0x)<Left>
 
 " ウィンドウを移動したら行頭にスクロール
 autocmd config WinLeave * normal 200zh
@@ -129,7 +132,7 @@ command! -nargs=+ CommandCabbr call CommandCabbr(<f-args>)
 " BufferDeleteNoCloseWindowでbdを置き換え
 command! -bang Bd buffer#|bdelete<bang>#
 
-" g     rep after incsearch
+" grep after incsearch
 function! s:grep_incsearch(cmdtype) abort
   echo a:cmdtype
   if a:cmdtype == '/' || a:cmdtype == '?' 
@@ -147,9 +150,6 @@ if executable('rg')
   set grepformat=%f:%l:%c:%m
 endif
 
- " auto QuickFix
- autocmd QuickfixCmdPost make,*grep* copen
-
 " UI
 " ----------------------------------------
 
@@ -163,6 +163,33 @@ set nowrap
 set noshowmode
 
 set foldmethod=syntax
+set foldcolumn=3
+set foldlevel=100
+set fillchars=foldopen:,foldsep:┊,foldclose:
+
+" make comments italic
+autocmd config ColorScheme * highlight Comment term=italic cterm=italic gui=italic
+
+" Quickfix
+" ----------------------------------------
+
+" autocmd config QuickfixCmdPost make,*grep* copen
+
+nnoremap <unique><silent> qc <CMD>cclose<CR>
+nnoremap <unique><silent> qo <CMD>copen<CR>
+
+function s:quickfix_init() abort
+  nnoremap n <CMD>cnext<CR>
+  nnoremap N <CMD>cprevious<CR>
+endfunction
+
+function s:quickfix_clean() abort
+  nnoremap n n
+  nnoremap N N
+endfunction
+
+autocmd config BufWinEnter quickfix call s:quickfix_init()
+autocmd config BufWinLeave quickfix call s:quickfix_clean()
 
 " Command Line Window
 " ----------------------------------------
@@ -262,7 +289,7 @@ set hlsearch
 
 
 " " マルチバイト文字の表示をいい感じに
-set ambiwidth=double
+" set ambiwidth=double
 
 
 " enable mouse
@@ -416,8 +443,6 @@ endif
 " autocmd config SessionLoadPost * call s:clean_misc(expand('<afile>'))  
 
 autocmd config VimLeave * if &buftype == 'nofile' | execute 'bdelete '  . expand('<afile>') | endif
-
-
 
 " sessions settings
 set sessionoptions=buffers,curdir,folds,resize,tabpages,terminal,winsize
