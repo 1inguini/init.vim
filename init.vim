@@ -134,8 +134,7 @@ command! -bang Bd buffer#|bdelete<bang>#
 
 " grep after incsearch
 function! s:grep_incsearch(cmdtype) abort
-  echo a:cmdtype
-  if a:cmdtype == '/' || a:cmdtype == '?' 
+  if a:cmdtype == '/' || a:cmdtype == '?'
     let l:cmdline = getcmdline()
     if !empty(l:cmdline)
       execute 'silent vimgrep "' . escape(l:cmdline, '"') . '" %'
@@ -206,7 +205,7 @@ function! s:cmdwin_local() abort
   " search backwords with current line
   nnoremap <buffer> / yy?<C-r>"
 
-  " close commandline window with qq 
+  " close commandline window with qq
   nnoremap <buffer> qq <CMD>q<CR>
   vnoremap <buffer> qq <Esc><CMD>q<CR>
   " inoremap <buffer> <C-c> <Esc><CMD>q<CR>
@@ -440,7 +439,7 @@ endif
 "     execute 'bdelete ' . a:buf
 "   endif
 " endfunction
-" autocmd config SessionLoadPost * call s:clean_misc(expand('<afile>'))  
+" autocmd config SessionLoadPost * call s:clean_misc(expand('<afile>'))
 
 autocmd config VimLeave * if &buftype == 'nofile' | execute 'bdelete '  . expand('<afile>') | endif
 
