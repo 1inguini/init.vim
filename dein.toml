@@ -6,9 +6,6 @@ hook_add = '''
 
 # Filetype Specific
 # ----------------------------------------
-[ftplugin]
-_ = ''
-
 help = '''
 nnoremap <buffer> <CR> <C-]>
 nnoremap <buffer> <BS> <C-T>
@@ -248,7 +245,7 @@ let g:fern#renderer = 'nerdfont'
 let g:fern#hide_cursor = v:true
 
 " show hidden files
-let g:fern#default_hidden = v:false
+let g:fern#default_hidden = v:true
 
 let g:fern#disable_default_mappings = v:true
 
@@ -698,7 +695,7 @@ augroup config Colorschemes * RainbowToggleOn
 [[plugins]]
 repo = 'rrethy/vim-hexokinase'
 lazy = false
-update = 'make hexokinase'
+build = 'make hexokinase'
 # augroup = 'config'
 # on_event = 'VimEnter'
 hook_add = '''
@@ -904,6 +901,7 @@ nnoremap <leader>al :AnyJumpLastResults<CR>
 [[plugins]]
 repo = 'arthurxavierx/vim-unicoder'
 lazy = true
+on_ft = ['lean']
 
 # deal with camelCase and snake_case
 [[plugins]]
@@ -984,12 +982,17 @@ repo = 'neovimhaskell/haskell-vim'
 lazy = false
 # on_ft = 'haskell'
 
+[[plugins]]
+repo = 'vmchale/dhall-vim'
+lazy = false
+
 # Idris
 # ----------------------------------------
 [[plugins]]
 repo = 'idris-hackers/idris-vim'
 lazy = false
 # on_ft = 'idris'
+
 hook_add = '''
 let g:idris_indent_if = 0
 let g:idris_indent_case = 2
@@ -1004,9 +1007,32 @@ let g:idris_indent_rewrite = 2
 # Lean
 # ----------------------------------------
 [[plugins]]
-repo = 'leanprover/lean.vim'
-lazy = false
-# on_ft = 'lean'
+repo = 'Julian/lean.nvim'
+lazy = true
+if = 'has("nvim")'
+depends = 'plenary.nvim'
+on_ft = 'lean'
+# on_event = 'VimEnter'
+# hook_post_source = '''
+# lua << EOF
+# -- Enable lean.nvim, and enable abbreviations and mappings
+# -- require('lean').setup{
+# --     abbreviations = { builtin = true },
+# --     mappings = true,
+# -- }
+
+# -- -- Update error messages even while you're typing in insert mode
+# -- vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+# --   vim.lsp.diagnostic.on_publish_diagnostics, {
+# --     underline = true,
+# --     virtual_text = { spacing = 4 },
+# --     update_in_insert = true,
+# --   }
+# -- )
+# EOF
+# " echo g:dein#plugin.name . ' hook_post_source loaded'
+# '''
+
 
 # Rust
 # ----------------------------------------
@@ -1038,6 +1064,14 @@ rev = 'stable'
 if = 'has("nvim")'
 # on_ft = 'R'
 
+# Go
+# ----------------------------------------
+[[plugins]]
+repo = 'fatih/vim-go'
+lazy = false
+on_source = ':GoUpdateBinaries'
+
+
 # Org
 # ----------------------------------------
 [[plugins]]
@@ -1052,7 +1086,9 @@ lazy = false
 repo = 'neovim/nvim-lspconfig'
 lazy = true
 if = 'has("nvim")'
-depends = ['lspsaga.nvim', 'trouble.nvim', 'lsp-status.nvim', 'nvim-lsp-smag', 'folding-nvim']
+depends = [
+  # 'lspsaga.nvim',
+  'trouble.nvim', 'lsp-status.nvim', 'nvim-lsp-smag', 'folding-nvim']
 augroup = 'config'
 on_event = 'VimEnter'
 hook_add = '''
@@ -1133,6 +1169,16 @@ lsp.hls.setup(coq.lsp_ensure_capabilities{
   cmd = { "haskell-language-server-wrapper", "--lsp" },
 })
 
+lsp.lean3ls.setup(coq.lsp_ensure_capabilities{
+  on_attach = on_attach,
+  capability = lsp_status.capability
+})
+
+lsp.dhall_lsp_server.setup(coq.lsp_ensure_capabilities{
+  on_attach = on_attach,
+  capability = lsp_status.capability
+})
+
 lsp.elmls.setup(coq.lsp_ensure_capabilities{
   on_attach = on_attach,
   capability = lsp_status.capability
@@ -1198,55 +1244,55 @@ depends = 'nvim-lspconfig'
 # UI for LSP
 # ----------------------------------------
 
-[[plugins]]
-repo = 'glepnir/lspsaga.nvim'
-lazy = true
-if = 'has("nvim")'
-depends = 'nvim-lspconfig'
-hook_post_source = '''
-lua << EOF
-local saga = require 'lspsaga'
+# [[plugins]]
+# repo = 'glepnir/lspsaga.nvim'
+# lazy = true
+# if = 'has("nvim")'
+# depends = 'nvim-lspconfig'
+# hook_post_source = '''
+# lua << EOF
+# local saga = require 'lspsaga'
 
-saga.init_lsp_saga {
-  -- default value
-  -- use_saga_diagnostic_sign = true
-  -- error_sign = '',
-  -- warn_sign = '',
-  -- hint_sign = '',
-  -- infor_sign = '',
-  -- dianostic_header_icon = '   ',
-  code_action_icon = '',
-  -- code_action_prompt = {
-  --   enable = true,
-  --   sign = true,
-  --   sign_priority = 20,
-  --   virtual_text = true,
-  -- },
-  -- finder_definition_icon = '  ',
-  -- finder_reference_icon = '  ',
-  -- max_preview_lines = 10, -- preview lines of lsp_finder and definition preview
-  -- finder_action_keys = {
-  --   open = 'o', vsplit = 's',split = 'i',quit = 'q',scroll_down = '<C-f>', scroll_up = '<C-b>' -- quit can be a table
-  -- },
-  -- code_action_keys = {
-  --   quit = 'q',exec = '<CR>'
-  -- },
-  -- rename_action_keys = {
-  --   quit = '<C-c>',exec = '<CR>'  -- quit can be a table
-  -- },
-  -- definition_preview_icon = '  '
-  -- -- "single" "double" "round" "plus"
-  -- border_style = "single"
-  -- rename_prompt_prefix = '➤',
-  -- if you don't use nvim-lspconfig you must pass your server name and
-  -- the related filetypes into this table
-  -- like server_filetype_map = {metals = {'sbt', 'scala'}}
-  -- server_filetype_map = {}
-}
+# saga.init_lsp_saga {
+#   -- default value
+#   -- use_saga_diagnostic_sign = true
+#   -- error_sign = '',
+#   -- warn_sign = '',
+#   -- hint_sign = '',
+#   -- infor_sign = '',
+#   -- dianostic_header_icon = '   ',
+#   code_action_icon = '',
+#   -- code_action_prompt = {
+#   --   enable = true,
+#   --   sign = true,
+#   --   sign_priority = 20,
+#   --   virtual_text = true,
+#   -- },
+#   -- finder_definition_icon = '  ',
+#   -- finder_reference_icon = '  ',
+#   -- max_preview_lines = 10, -- preview lines of lsp_finder and definition preview
+#   -- finder_action_keys = {
+#   --   open = 'o', vsplit = 's',split = 'i',quit = 'q',scroll_down = '<C-f>', scroll_up = '<C-b>' -- quit can be a table
+#   -- },
+#   -- code_action_keys = {
+#   --   quit = 'q',exec = '<CR>'
+#   -- },
+#   -- rename_action_keys = {
+#   --   quit = '<C-c>',exec = '<CR>'  -- quit can be a table
+#   -- },
+#   -- definition_preview_icon = '  '
+#   -- -- "single" "double" "round" "plus"
+#   -- border_style = "single"
+#   -- rename_prompt_prefix = '➤',
+#   -- if you don't use nvim-lspconfig you must pass your server name and
+#   -- the related filetypes into this table
+#   -- like server_filetype_map = {metals = {'sbt', 'scala'}}
+#   -- server_filetype_map = {}
+# }
 
-EOF
-" echo g:dein#plugin.name . ' hook_post_source loaded'
-'''
+# EOF
+# " echo g:dein#plugin.name . ' hook_post_source loaded'
+# '''
 
 # A pretty list for showing diagnostics, references, telescope results, quickfix and location lists
 [[plugins]]
@@ -1304,7 +1350,7 @@ lazy = false
 [[plugins]]
 repo = 'tpope/vim-fugitive'
 lazy = true
-on_cmd = 'Git'
+on_cmd = ['Git', 'Gvdiffsplit']
 
 [[plugins]]
 repo = 'TimUntersberger/neogit'
@@ -1326,7 +1372,7 @@ EOF
 
 [[plugins]]
 repo = 'nvim-lua/plenary.nvim'
-lazy = true
+lazy = false
 if = 'has("nvim")'
 
 
@@ -1335,11 +1381,42 @@ if = 'has("nvim")'
 # lazy = true
 # hook_add = '''
 
-# " echo g:dein#plugin.name . ' hook_post_source loaded'
+# " echo g:dein#plugin.name . ' hook_add loaded'
 # '''
 
 # Miscellaneous
 # ========================================
+
+# Workspace
+[[plugins]]
+repo = 'thaerkh/vim-workspace'
+lazy = true
+on_event = 'VimEnter'
+on_cmd = 'ToggleWorkspace'
+hook_post_source = '''
+" let g:workspace_autocreate = 0 " enabled = 1 , disabled = 0 (default)
+" let g:workspace_create_new_tabs = 1  " enabled = 1 (default), disabled = 0
+
+if has('nvim')
+  let g:workspace_session_directory = stdpath('data') . '/sessions/'
+else
+  let g:workspace_session_directory = $HOME . '/.vim/sessions/'
+endif
+
+let g:workspace_session_disable_on_args = v:true
+
+" let g:workspace_persist_undo_history = 1  " enabled = 1 (default), disabled = 0
+let g:workspace_undodir = g:workspace_session_directory . 'undodir'
+
+" let g:workspace_autosave_always = 0 " enable the autosave feature outside of a workspace session
+let g:workspace_autosave = v:false
+" let g:workspace_autosave_untrailspaces = 1
+" let g:workspace_autosave_untrailtabs = 1
+let g:workspace_autosave_ignore = ['gitcommit']
+
+nnoremap <leader>W :ToggleWorkspace<CR>
+# " echo g:dein#plugin.name . ' hook_add loaded'
+'''
 
 # キーバインドを表示
 [[plugins]]

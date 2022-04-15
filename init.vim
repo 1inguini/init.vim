@@ -52,22 +52,22 @@ map <unique><nowait> qq <Esc>
 inoremap <unique> qq <Esc>
 inoremap <unique> q<Space> q
 
-" remap hjkl u to hjuk l
-map <unique> u <Up>
-map <unique> k <Right>
-map <unique> U <S-Up>
-map <unique> K <S-Right>
-map <unique> <C-u> <C-Up>
-map <unique> <C-k> <C-Right>
-map <unique> <C-j> <C-Down>
-" nnoremap <S-Down> J
-nmap h <Left>
-nnoremap <unique> <C-w>u <C-w>k
-nnoremap <unique> <C-w>k <C-w>l
-nnoremap <unique> <C-w>U <C-w>K
-nnoremap <unique> <C-w>K <C-w>L
-noremap <unique> l u
-noremap <unique> L U
+" " remap hjkl u to hjuk l
+" map <unique> u <Up>
+" map <unique> k <Right>
+" map <unique> U <S-Up>
+" map <unique> K <S-Right>
+" map <unique> <C-u> <C-Up>
+" map <unique> <C-k> <C-Right>
+" map <unique> <C-j> <C-Down>
+" " nnoremap <S-Down> J
+" nmap h <Left>
+" nnoremap <unique> <C-w>u <C-w>k
+" nnoremap <unique> <C-w>k <C-w>l
+" nnoremap <unique> <C-w>U <C-w>K
+" nnoremap <unique> <C-w>K <C-w>L
+" noremap <unique> l u
+" noremap <unique> L U
 
 " 折り返し時に表示行単位での移動できるようにする
 noremap <Up> g<Up>
@@ -323,8 +323,8 @@ set formatoptions=jqlt
 
 
 " terminal関係
-" shellをfishに
-set shell=fish
+" shellをzshに
+set shell=zsh
 
 
 " install dein.vim
@@ -446,37 +446,37 @@ autocmd config VimLeave * if &buftype == 'nofile' | execute 'bdelete '  . expand
 " sessions settings
 set sessionoptions=buffers,curdir,folds,resize,tabpages,terminal,winsize
 
-" セッション自動保存
-augroup SessionAutocommands
-  autocmd!
-  autocmd VimEnter * nested call <SID>RestoreSessionWithConfirm()
-  autocmd VimLeave * nested call <SID>SaveSessionWithConfirm()
-  " autocmd VimLeave * call s:on_vim_leave() | SaveSession
-augroup END
+" " セッション自動保存
+" augroup SessionAutocommands
+"   autocmd!
+"   autocmd VimEnter * nested call <SID>RestoreSessionWithConfirm()
+"   autocmd VimLeave * nested call <SID>SaveSessionWithConfirm()
+"   " autocmd VimLeave * call s:on_vim_leave() | SaveSession
+" augroup END
 
-if has ('nvim')
-  command! RestoreSession source ~/.local/share/nvim/.session
-  command! SaveSession    mksession! ~/.local/share/nvim/.session
-else
-  command! RestoreSession source ~/.vim/.session
-  command! SaveSession    mksession! ~/.vim/.session
-endif
-" Restore session with confirm
-function! s:RestoreSessionWithConfirm()
-  let msg = 'Do you want to restore previous session?'
+" if has ('nvim')
+"   command! RestoreSession source ~/.local/share/nvim/.session
+"   command! SaveSession    mksession! ~/.local/share/nvim/.session
+" else
+"   command! RestoreSession source ~/.vim/.session
+"   command! SaveSession    mksession! ~/.vim/.session
+" endif
+" " Restore session with confirm
+" function! s:RestoreSessionWithConfirm()
+"   let msg = 'Do you want to restore previous session?'
 
-  if !argc() && confirm(msg, "&Yes\n&No", 1, 'Question') == 1
-    execute 'RestoreSession'
-  endif
-endfunction
-" Save session with confirm
-function! s:SaveSessionWithConfirm()
-  let msg = 'Do you want to save this session?'
+"   if !argc() && confirm(msg, "&Yes\n&No", 1, 'Question') == 1
+"     execute 'RestoreSession'
+"   endif
+" endfunction
+" " Save session with confirm
+" function! s:SaveSessionWithConfirm()
+"   let msg = 'Do you want to save this session?'
 
-  if !argc() && confirm(msg, "&Yes\n&No", 1, 'Question') == 1
-    execute 'SaveSession'
-  endif
-endfunction
+"   if !argc() && confirm(msg, "&Yes\n&No", 1, 'Question') == 1
+"     execute 'SaveSession'
+"   endif
+" endfunction
 
 
 else
@@ -492,7 +492,7 @@ call plug#begin(stdpath('data') . '/plugged-vscode')
 " Make sure you use single quotes
 
 " 括弧関係
-Plug 'tpope/vim-surround'
+Plug 'machakann/vim-sandwich'
 
 " deal with camelCase and snake_case
 Plug 'chaoren/vim-wordmotion'
