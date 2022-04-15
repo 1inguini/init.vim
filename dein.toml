@@ -64,20 +64,7 @@ if = 'has("nvim")'
 [[plugins]]
 repo = 'joshdick/onedark.vim'
 lazy = true
-is = '!has("nvim")'
 hook_add = '''
-autocmd config VimEnter * nested
-      \ set background=dark |
-      \ colorscheme onedark
-
-" echo g:dein#plugin.name . ' hook_add loaded'
-'''
-
-repo = 'navarasu/onedark.nvim'
-lazy = true
-if = 'has("nvim")'
-hook_add = '''
-let g:disable_toggle_style = v:true
 autocmd config VimEnter * nested
       \ set background=dark |
       \ colorscheme onedark
@@ -103,12 +90,12 @@ autocmd config VimEnter * nested
 # " echo g:dein#plugin.name . ' hook_add loaded'
 # '''
 
-# [[plugins]] repo = 'ayu-theme/ayu-vim'
-# [[plugins]] repo = 'sonph/onehalf' rtp = 'vim'
-# [[plugins]] repo = 'jacoborus/tender.vim'
-# [[plugins]] repo = 'romainl/Apprentice'
-# [[plugins]] repo = 'drewtempelmeyer/palenight.vim'
-# [[plugins]] repo = 'ErichDonGubler/vim-sublime-monokai'
+[[plugins]] repo = 'ayu-theme/ayu-vim'
+[[plugins]] repo = 'sonph/onehalf' rtp = 'vim'
+[[plugins]] repo = 'jacoborus/tender.vim'
+[[plugins]] repo = 'romainl/Apprentice'
+[[plugins]] repo = 'drewtempelmeyer/palenight.vim'
+[[plugins]] repo = 'ErichDonGubler/vim-sublime-monokai'
 
 # # One terminal plugin to rule them all (eventually).
 # [[plugins]]
