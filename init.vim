@@ -43,14 +43,13 @@ if has('unix') && !has('gui_running')
   map! <NUL> <C-Space>
 endif
 
-" use 'm' for 'Macro' for defining macros
-nnoremap <unique> m q
-nnoremap q <NOP>
-
 " use 'qq' as <Esc>
-map <unique><nowait> qq <Esc>
-inoremap <unique> qq <Esc>
-inoremap <unique> q<Space> q
+" inoremap <unique><nowait> <qq> <Esc>
+" take care of this in lexima
+
+" normal modeでEnterで1行入力
+nnoremap <CR> o<Esc>
+" nnoremap <S-CR> o<Esc>
 
 " " remap hjkl u to hjuk l
 " map <unique> u <Up>
@@ -81,8 +80,8 @@ nnoremap <unique> <C-Down> <C-d>
 " noremap $ g_
 
 " cut won't de pasted on default
-noremap P "+p
-" noremap "+p p
+noremap P \"+p
+" noremap \"+p p
 
 " ESC連打でハイライト解除
 " nnoremap <Esc><Esc> <CMD>nohlsearch<CR><Esc>
@@ -96,10 +95,6 @@ nnoremap * */<Up><CR>
 " C-s で保存、ついでに再描画
 nnoremap <silent> <C-s> <CMD>w<CR>
 inoremap <silent> <C-s> <ESC><CMD>w<CR>a
-
-" normal modeでEnterで1行入力
-nnoremap <CR> o<Esc>
-nnoremap <S-CR> o<Esc>
 
 " Esc for escaping terminal
 if has('nvim')
@@ -210,9 +205,9 @@ function! s:cmdwin_local() abort
   vnoremap <buffer> qq <Esc><CMD>q<CR>
   " inoremap <buffer> <C-c> <Esc><CMD>q<CR>
 
-  " send command with <C-Enter>
-  nnoremap <buffer> <C-CR> <C-c>
-  inoremap <buffer> <C-CR> <C-c>
+  " send command with <Enter>
+  nnoremap <buffer> <CR> <C-c><CR>
+  inoremap <buffer> <CR> <Esc><C-c><CR>
 
   " disable line numbers
   setlocal nonumber
@@ -299,10 +294,10 @@ set mouse=a
 set termguicolors
 
 
-" automaticly cd to opened file
-if has('autochdir')
-  set autochdir
-endif
+" " automaticly cd to opened file
+" if has('autochdir')
+"   set autochdir
+" endif
 
 " spellcheck
 " set spell
@@ -481,42 +476,115 @@ set sessionoptions=buffers,curdir,folds,resize,tabpages,terminal,winsize
 
 else
 
-" yank from clipboard
+" yank from c:lipboard
 set clipboard=unnamedplus
 
-let g:plug_window='topleft new'
-" Specify a directory for plugins
-" - For Neovim: stdpath('data') . '/plugged'
-" - Avoid using standard Vim directory names like 'plugin'
-call plug#begin(stdpath('data') . '/plugged-vscode')
-" Make sure you use single quotes
+"文字コードをUTF-8に設定
+set fenc=utf-8
+set encoding=utf8
 
-" 括弧関係
-Plug 'machakann/vim-sandwich'
+" set <Leader> key
+let mapleader = "\<Space>"
 
-" deal with camelCase and snake_case
-Plug 'chaoren/vim-wordmotion'
+" normal modeでEnterで1行入力
+nnoremap <CR> o<Esc>
 
-" jumping around the code
-Plug 'asvetliakov/vim-easymotion'
-call plug#end()
+" 折り返し時に表示行単位での移動できるようにする
+noremap <Up> g<Up>
+noremap <Down> g<Down>
 
-" jumping around the code
-" Plug 'easymotion/vim-easymotion'
-let g:Easymotion_do_mapping = 0
-" move to {char}
-map f <Plug>(easymotion-bd-f)
-map 2f <Plug>(easymotion-bd-f2)
-" Move to word
-map  gw <Plug>(easymotion-bd-w)
-" Move to line
-map gj <Plug>(easymotion-bd-jk)
+" <C-Up|Down>でページめくり
+nnoremap <unique> <C-Up> <C-u>
+nnoremap <unique> <C-Down> <C-d>
 
-" comments using vscode features
-xmap gc  <Plug>VSCodeCommentary
-nmap gc  <Plug>VSCodeCommentary
-omap gc  <Plug>VSCodeCommentary
-nmap gcc <Plug>VSCodeCommentaryLine
+" ESC連打でハイライト解除
+nnoremap <unique><silent> <Esc> <CMD>let @/ = '' <BAR> cclose<CR>
+
+" visual / で選択中のものを検索、* でハイライト
+vnoremap / y/\V<C-R>=escape(@",'/\')<CR><CR>
+vnoremap * y/\V<C-R>=escape(@",'/\')<CR><CR><CR>
+nnoremap * */<Up><CR>
+
+" " バックアップファイルを作らない
+" set nobackup
+set backup
+" " スワップファイルを作らない
+" set noswapfile
+set swapfile
+if has('nvim')
+  execute 'set backupdir=' . stdpath('data') . '/backup'
+  execute 'set directory=' . stdpath('data') . '/backup'
+else
+  set backupdir=~/.vim/backup
+  set directory=~/.vim/backup
+endif
+
+" 編集中のファイルが変更されたら自動で読み直す
+set autoread
+" バッファが編集中でもその他のファイルを開けるように
+set hidden
+" 入力中のコマンドをステータスに表示する
+set showcmd
+
+" 検索文字列入力時に順次対象文字列にヒットさせる
+set incsearch
+" 検索時に最後まで行ったら最初に戻る
+set wrapscan
+" 検索語をハイライト表示
+set hlsearch
+
+" ignore Japanese
+set spelllang=en,cjk
+
+" terminal関係
+" shellをzshに
+set shell=zsh
+
+" undo履歴保持
+if has('persistent_undo')
+  let s:undo_path=stdpath('data') . '/undo'
+  exe 'set undodir=' .. s:undo_path
+  set undofile
+endif
+
+" config augroup for configs in dein
+augroup config | autocmd! | augroup END
+
+" cleanup on leave
+autocmd config VimLeave * if &buftype == 'nofile' | execute 'bdelete '  . expand('<afile>') | endif
+
+" sessions settings
+set sessionoptions=buffers,curdir,folds,resize,tabpages,terminal,winsize
+
+" Required:
+let g:dein_dir = stdpath('data') . '/dein_vscode'
+
+let s:dein_repo_dir = g:dein_dir . '/repos/github.com/Shougo/dein.vim'
+
+" なければgit clone
+if !isdirectory(s:dein_repo_dir)
+  execute '!git clone https://github.com/Shougo/dein.vim' s:dein_repo_dir
+endif
+
+execute 'set runtimepath+=' . s:dein_repo_dir
+
+call dein#begin(g:dein_dir)
+
+" manage packages with toml
+" reset augroup
+let s:toml_file = stdpath('config') . '/dein_vscode.toml'
+call dein#load_toml(s:toml_file)
+
+" Required:
+call dein#end()
+
+" If you want to install not installed plugins on startup.
+if dein#check_install()
+  call dein#install()
+endif
+
+" remove packages
+call map(dein#check_clean(), { _, val -> delete(val, 'rf') })
 
 endif
 

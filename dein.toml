@@ -1,5 +1,5 @@
-
 # Vim Settings
+
 # ========================================
 hook_add = '''
 '''
@@ -42,6 +42,21 @@ command! -nargs=1 DeinSource call dein#source(<f-args>)
 repo = 'wsdjeg/dein-ui.vim'
 depends = 'dein.vim'
 on_cmd = 'DeinUpdate'
+
+# Fundamental Dependencies
+# ========================================
+
+# denops
+# ----------------------------------------
+[[plugins]]
+repo = 'vim-denops/denops.vim'
+
+# lua for nvim
+# ----------------------------------------
+[[plugins]]
+repo = 'nvim-lua/plenary.nvim'
+lazy = false
+if = 'has("nvim")'
 
 
 # UI
@@ -560,7 +575,7 @@ require('lualine').setup{
     },
     lualine_b = {'branch'},
     lualine_c = {'filename'},
-    lualine_x = {require('lsp-status').status, 'encoding', 'fileformat', 'filetype'},
+    lualine_x = {"require('lsp-status').status()", 'encoding', 'fileformat', 'filetype'},
     lualine_y = {'progress'},
     lualine_z = {'location'}
   },
@@ -950,6 +965,9 @@ let g:lexima_enable_basic_rules = v:true
 let g:lexima_enable_newline_rules = v:true
 let g:lexima_enable_endwise_rules = v:true
 
+" use '<Enter>' as <Esc>
+let g:lexima_map_escape = 'qq'
+
 " echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
@@ -1065,6 +1083,44 @@ on_source = ':GoUpdateBinaries'
 repo = 'jceb/vim-orgmode'
 lazy = false
 
+# Markdown
+# ----------------------------------------
+[[plugins]]
+repo = 'kat0h/bufpreview.vim'
+lazt = true
+on_ft = 'markdown'
+on_cmd = ['PreviewMarkdown', 'PreviewMarkdownStop', 'PreviewMarkdownToggle']
+depends = 'denops.vim'
+
+
+# LaTeX
+# ----------------------------------------
+[[plugins]]
+repo = 'lervag/vimtex'
+lazy = false
+hook_add = '''
+let g:vimtex_view_method = 'zathura'
+
+" see ":help vimtex-compiler".
+let g:vimtex_compiler_method = 'tectonic'
+let maplocalleader = "t"
+let g:vimtex_syntax_conceal_disable = v:true
+" let g:vimtex_syntax_conceal = {
+"       \ 'accents': 1,
+"       \ 'cites': 1,
+"       \ 'fancy': 1,
+"       \ 'greek': 1,
+"       \ 'math_bounds': v:false,
+"       \ 'math_delimiters': 1,
+"       \ 'math_fracs': 1,
+"       \ 'math_super_sub': 1,
+"       \ 'math_symbols': 1,
+"       \ 'sections': 0,
+"       \ 'styles': 1,
+"       \}
+
+'''
+
 # Language Server
 # ========================================
 
@@ -1176,6 +1232,11 @@ lsp.yamlls.setup(coq.lsp_ensure_capabilities{
   capability = lsp_status.capability
 })
 
+lsp.texlab.setup(coq.lsp_ensure_capabilities({
+  on_attach = on_attach,
+  capability = lsp_status.capability
+}))
+
 EOF
 
 " echo g:dein#plugin.name . ' hook_add loaded'
@@ -1199,17 +1260,25 @@ repo = 'ms-jpq/coq_nvim'
 post_update = 'COQdeps'
 if = 'has("nvim")'
 lazy = false
-depends = 'coc.artifacts'
 hook_add = '''
-let g:coq_settings = { 'auto_start': v:true }
+let g:coq_settings = {
+      \ 'auto_start': v:true,
+      \ 'keymap.jump_to_mark': '<TAB>'
+      \ }
 
 " echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
+[[plugins]]
+repo = 'ms-jpq/coq.thirdparty'
+if = 'has("nvim")'
+lazy = true
+depends = 'coq_nvim'
+
 # 9000+ Snippets
 [[plugins]]
 repo = 'ms-jpq/coq.artifacts'
-rev = 'artifacts'
+# rev = 'artifacts'
 if = 'has("nvim")'
 lazy = true
 depends = 'coq_nvim'
@@ -1300,6 +1369,11 @@ repo = 'nvim-lua/lsp-status.nvim'
 lazy = true
 depends = 'nvim-lspconfig'
 if = 'has("nvim")'
+on_cmd = 'LspStatus'
+hook_post_source = '''
+command! LspStatus echo luaeval("require('lsp-status').status()")
+
+'''
 
 
 # Development
@@ -1357,12 +1431,6 @@ EOF
 " echo g:dein#plugin.name . ' hook_post_source loaded'
 '''
 
-[[plugins]]
-repo = 'nvim-lua/plenary.nvim'
-lazy = false
-if = 'has("nvim")'
-
-
 # [[plugins]]
 # repo = 'tpope/vim-fugitive'
 # lazy = true
@@ -1380,7 +1448,7 @@ repo = 'thaerkh/vim-workspace'
 lazy = true
 on_event = 'VimEnter'
 on_cmd = 'ToggleWorkspace'
-hook_post_source = '''
+hook_add = '''
 " let g:workspace_autocreate = 0 " enabled = 1 , disabled = 0 (default)
 " let g:workspace_create_new_tabs = 1  " enabled = 1 (default), disabled = 0
 
