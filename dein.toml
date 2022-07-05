@@ -77,14 +77,17 @@ if = 'has("nvim")'
 # https://qiita.com/kawaz/items/ee725f6214f91337b42b#colorscheme-%E3%81%AF-vimenter-%E3%81%AB-nested-%E6%8C%87%E5%AE%9A%E3%81%A7%E9%81%85%E5%BB%B6%E8%A8%AD%E5%AE%9A%E3%81%99%E3%82%8B
 
 [[plugins]]
-repo = 'joshdick/onedark.vim'
+# repo = 'joshdick/onedark.vim'
+repo = 'navarasu/onedark.nvim'
+if = 'has("nvim")'
 lazy = true
 hook_add = '''
 autocmd config VimEnter * nested
+      \ call dein#source(['onedark.nvim']) |
       \ set background=dark |
       \ colorscheme onedark
 
-" echo g:dein#plugin.name . ' hook_add loaded'
+echo g:dein#plugin.name . ' hook_add loaded'
 '''
 
 # [[plugins]]
@@ -722,20 +725,20 @@ let g:Hexokinase_highlighters = ['foreground']
 # " echo g:dein#plugin.name . ' hook_add loaded'
 # '''
 
-# TSelectBuffer: a simple buffer selector
-[[plugins]]
-repo = 'vim-scripts/tselectbuffer'
-lazy = false
-depends = 'tlib'
-hook_add = '''
-nnoremap <Leader>b :TSelectBuffer!<CR>
+# # TSelectBuffer: a simple buffer selector
+# [[plugins]]
+# repo = 'vim-scripts/tselectbuffer'
+# lazy = false
+# depends = 'tlib'
+# hook_add = '''
+# nnoremap <Leader>b :TSelectBuffer!<CR>
 
-" echo g:dein#plugin.name . ' hook_add loaded'
-'''
+# " echo g:dein#plugin.name . ' hook_add loaded'
+# '''
 
-[[plugins]]
-repo = 'vim-scripts/tlib'
-lazy = false
+# [[plugins]]
+# repo = 'vim-scripts/tlib'
+# lazy = false
 
 # [[plugins]]
 # repo = 'jlanzarotta/bufexplorer'
