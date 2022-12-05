@@ -67,13 +67,13 @@ repo = 'easymotion/vim-easymotion'
 hook_add = '''
 " jumping around the code
 let g:Easymotion_do_mapping = 0
-" move to {char}
-map f <Plug>(easymotion-bd-f)
-map 2f <Plug>(easymotion-bd-f2)
-" Move to word
-map  gw <Plug>(easymotion-bd-w)
-" Move to line
-map gj <Plug>(easymotion-bd-jk)
+" " move to {char}
+" map f <Plug>(easymotion-bd-f)
+" map 2f <Plug>(easymotion-bd-f2)
+" " Move to word
+" map  gw <Plug>(easymotion-bd-w)
+" " Move to line
+" map gj <Plug>(easymotion-bd-jk)
 
 " comments using vscode features
 xmap gc  <Plug>VSCodeCommentary
