@@ -192,34 +192,34 @@ EOF
 # Miscellaneous
 # ========================================
 
-# キーバインドを表示
-[[plugins]]
-repo = 'liuchengxu/vim-which-key'
-lazy = false
-if = '!has("nvim")'
+# # キーバインドを表示
+# [[plugins]]
+# repo = 'liuchengxu/vim-which-key'
+# lazy = false
+# if = '!has("nvim")'
 
-[[plugins]]
-repo = 'folke/which-key.nvim'
-lazy = true
-if = 'has("nvim")'
-augroup = 'config'
-on_event = 'VimEnter'
-hook_post_source = '''
+# [[plugins]]
+# repo = 'folke/which-key.nvim'
+# lazy = true
+# if = 'has("nvim")'
+# augroup = 'config'
+# on_event = 'VimEnter'
+# hook_post_source = '''
 
-noremap ? :WhichKey<CR>
+# noremap ? :WhichKey<CR>
 
-lua << EOF
-require('which-key').setup {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
-    plugins = {
-      spelling = {
-        enabled = true, -- enabling this will show WhichKey when pressing z= to select spelling suggestions
-      },
-    },
-  }
-EOF
+# lua << EOF
+# require('which-key').setup {
+#     -- your configuration comes here
+#     -- or leave it empty to use the default settings
+#     -- refer to the configuration section below
+#     plugins = {
+#       spelling = {
+#         enabled = true, -- enabling this will show WhichKey when pressing z= to select spelling suggestions
+#       },
+#     },
+#   }
+# EOF
 
-" echo g:dein#plugin.name . ' hook_post_source loaded'
-'''
+# " echo g:dein#plugin.name . ' hook_post_source loaded'
+# '''
