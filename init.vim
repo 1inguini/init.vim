@@ -1,17 +1,19 @@
-" python3を使わせるために適当にpython3を実行
-if !has('nvim')
- python3 0
-endif
-
-if !exists('g:vscode')
+" " python3を使わせるために適当にpython3を実行
+" if !has('nvim')
+"  python3 0
+" endif
 
 " setting
+
+augroup config | autocmd! | augroup END
+
+" yank from clipboard
+set clipboard=unnamedplus
 
 "文字コードをUTF-8に設定
 set fenc=utf-8
 set encoding=utf8
 
-augroup config | autocmd! | augroup END
 
 " Keybindings
 " ----------------------------------------
@@ -20,6 +22,68 @@ augroup config | autocmd! | augroup END
 let mapleader = "\<Space>"
 
 map <M-m> <Leader>
+
+" normal modeでEnterで1行入力
+nnoremap <CR> o<Esc>
+
+" ESC連打でハイライト解除
+nnoremap <unique><silent> <Esc> <CMD>let @/ = '' <BAR> cclose<CR>
+
+" visual / で選択中のものを検索、* でハイライト
+vnoremap / y/\V<C-R>=escape(@",'/\')<CR><CR>
+vnoremap * y/\V<C-R>=escape(@",'/\')<CR><CR><CR>
+nnoremap * */<Up><CR>
+
+" C-s で保存、ついでに再描画
+nnoremap <silent> <C-s> <CMD>w<CR>
+inoremap <silent> <C-s> <ESC><CMD>w<CR>a
+
+
+" " バックアップファイルを作る
+set backup
+" " スワップファイルを作る
+set swapfile
+if has('nvim')
+  execute 'set backupdir=' . stdpath('data') . '/backup'
+  execute 'set directory=' . stdpath('data') . '/backup'
+else
+  set backupdir=~/.vim/backup
+  set directory=~/.vim/backup
+endif
+
+
+" undo履歴保持
+if has('persistent_undo')
+  if has('nvim')
+    let s:undo_path=stdpath('data') . '/undo'
+  else
+    let s:undo_path=expand('~/.vim/undo')
+  endif
+  exe 'set undodir=' .. s:undo_path
+  set undofile
+endif
+
+" 検索系
+" 検索文字列が小文字の場合は大文字小文字を区別なく検索する
+" set ignore case
+" 検索文字列に大文字が含まれている場合は区別して検索する
+" set smart case
+" 検索文字列入力時に順次対象文字列にヒットさせる
+set incsearch
+" 検索時に最後まで行ったら最初に戻る
+set wrapscan
+" 検索語をハイライト表示
+set hlsearch
+
+" vim-plug
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync
+endif
+
+
+if !exists('g:vscode')
 
 " 端末のVimでもAltキーとC-Spaceを使えるように
 " https://thinca.hatenablog.com/entry/20101215/1292340358
@@ -46,10 +110,6 @@ endif
 " use 'qq' as <Esc>
 " inoremap <unique><nowait> <qq> <Esc>
 " take care of this in lexima
-
-" normal modeでEnterで1行入力
-nnoremap <CR> o<Esc>
-" nnoremap <S-CR> o<Esc>
 
 " " remap hjkl u to hjuk l
 " map <unique> u <Up>
@@ -83,19 +143,6 @@ nnoremap <unique> <C-Down> <C-d>
 noremap P \"+p
 " noremap \"+p p
 
-" ESC連打でハイライト解除
-" nnoremap <Esc><Esc> <CMD>nohlsearch<CR><Esc>
-nnoremap <unique><silent> <Esc> <CMD>let @/ = '' <BAR> cclose<CR>
-
-" visual / で選択中のものを検索、* でハイライト
-vnoremap / y/\V<C-R>=escape(@",'/\')<CR><CR>
-vnoremap * y/\V<C-R>=escape(@",'/\')<CR><CR><CR>
-nnoremap * */<Up><CR>
-
-" C-s で保存、ついでに再描画
-nnoremap <silent> <C-s> <CMD>w<CR>
-inoremap <silent> <C-s> <ESC><CMD>w<CR>a
-
 " Esc for escaping terminal
 if has('nvim')
   tnoremap <Esc> <C-\><C-n>
@@ -104,9 +151,9 @@ endif
 
 inoremap <C-v>u <C-r>=nr2char(0x)<Left>
 
-" ウィンドウを移動したら行頭にスクロール
-autocmd config WinLeave * normal 200zh
-autocmd config WinEnter * normal 201zh
+"" ウィンドウを移動したら行頭にスクロール
+"autocmd config WinLeave * normal 200zh
+"autocmd config WinEnter * normal 201zh
 
 " command to abbreviate commands
 " https://vim.fandom.com/wiki/Replace_a_builtin_command_using_cabbrv
@@ -151,10 +198,10 @@ endif
 let g:sidebar_width = 30
 
 " 文字の折返しの無効化
-set nowrap
+" set nowrap
 
 " remove -- INSERT -- because it will be shown in statusline
-set noshowmode
+" set noshowmode
 
 set foldmethod=syntax
 set foldcolumn=3
@@ -215,19 +262,6 @@ endfunction
 autocmd config CmdWinEnter * call s:cmdwin_local()
 
 
-" " バックアップファイルを作らない
-" set nobackup
-set backup
-" " スワップファイルを作らない
-" set noswapfile
-set swapfile
-if has('nvim')
-  execute 'set backupdir=' . stdpath('data') . '/backup'
-  execute 'set directory=' . stdpath('data') . '/backup'
-else
-  set backupdir=~/.vim/backup
-  set directory=~/.vim/backup
-endif
 
 " 編集中のファイルが変更されたら自動で読み直す
 set autoread
@@ -269,17 +303,6 @@ set tabstop=8
 set shiftwidth=2
 
 
-" 検索系
-" 検索文字列が小文字の場合は大文字小文字を区別なく検索する
-" set ignore case
-" 検索文字列に大文字が含まれている場合は区別して検索する
-" set smart case
-" 検索文字列入力時に順次対象文字列にヒットさせる
-set incsearch
-" 検索時に最後まで行ったら最初に戻る
-set wrapscan
-" 検索語をハイライト表示
-set hlsearch
 
 
 " " マルチバイト文字の表示をいい感じに
@@ -317,56 +340,7 @@ set textwidth=99
 set formatoptions=jqlt
 
 
-" terminal関係
-" shellをzshに
-set shell=zsh
-
-
-" install dein.vim
-if &compatible
-  set nocompatible " Be iMproved
-endif
-
-" Required:
-if has ('nvim')
-  let g:dein_dir = stdpath('data') . '/dein'
-else
-  let g:dein_dir = '~/.vim/dein'
-endif
-
-let s:dein_repo_dir = g:dein_dir . '/repos/github.com/Shougo/dein.vim'
-
-" なければgit clone
-if !isdirectory(s:dein_repo_dir)
-  execute '!git clone https://github.com/Shougo/dein.vim' s:dein_repo_dir
-endif
-
-execute 'set runtimepath+=' . s:dein_repo_dir
-
-call dein#begin(g:dein_dir)
-
-" manage packages with toml
-" reset augroup
-if has('nvim')
-  let s:toml_file = stdpath('config') . '/dein.toml'
-  call dein#load_toml(s:toml_file)
-else
-  let s:toml_file = '~/.vim/dein.toml'
-  call dein#load_toml(s:toml_file)
-endif
-
-" Required:
-call dein#end()
-
-" If you want to install not installed plugins on startup.
-if dein#check_install()
-  call dein#install()
-endif
-
-" remove packages
-call map(dein#check_clean(), { _, val -> delete(val, 'rf') })
-
-" Required:
+" 言語ごとに別のインデント
 filetype plugin indent on
 " シンタックスハイライトの有効化
 syntax enable
@@ -413,21 +387,6 @@ set guioptions-=l
 set guioptions-=L
 " endif
 
-" yank from clipboard
-set clipboard=unnamedplus
-
-
-" undo履歴保持
-if has('persistent_undo')
-  if has('nvim')
-    let s:undo_path=stdpath('data') . '/undo'
-  else
-    let s:undo_path=expand('~/.vim/undo')
-  endif
-  exe 'set undodir=' .. s:undo_path
-  set undofile
-endif
-
 
 " function! s:clean_misc(buf) abort
 "   if empty(&filetype) || &filetype == 'help'
@@ -473,118 +432,229 @@ set sessionoptions=buffers,curdir,folds,resize,tabpages,terminal,winsize
 "   endif
 " endfunction
 
+" Plugins
+call plug#begin()
+
+if has("nvim")
+  Plug 'kyazdani42/nvim-web-devicons'
+endif
+
+" Colorschemes
+" ----------------------------------------
+if has("nvim")
+  Plug 'navarasu/onedark.nvim'
+else
+  Plug 'joshdick/onedark.vim'
+endif
+Plug 'ayu-theme/ayu-vim'
+Plug 'sonph/onehalf', { 'rtp': 'vim' }
+Plug 'jacoborus/tender.vim'
+Plug 'romainl/Apprentice'
+Plug 'drewtempelmeyer/palenight.vim'
+Plug 'ErichDonGubler/vim-sublime-monokai'
+
+" visualize undo-tree
+Plug 'mbbill/undotree'
+
+" indent guides
+Plug 'yggdroot/indentline'
+
+" highlight and remove whitespaces
+Plug 'ntpeters/vim-better-whitespace'
+
+" color parenthesizes
+Plug 'luochen1990/rainbow'
+
+" show the color of colorcodes
+if executable('go')
+  Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
+endif
+
+" deal with camelCase and snake_case
+Plug 'chaoren/vim-wordmotion'
+
+" comment out things
+Plug 'tomtom/tcomment_vim'
+
+" align things like =
+Plug 'junegunn/vim-easy-align'
+
+" run commands only in visual block with :<,>B
+Plug 'vim-scripts/vis'
+
+" surround textobjects with parentheses
+Plug 'machakann/vim-sandwich'
+
+" 閉じ括弧挿入
+Plug 'cohama/lexima.vim'
+
+" git情報を左に表示
+Plug 'airblade/vim-gitgutter'
+
+" キーバインドを表示
+if has("nvim")
+  Plug 'folke/which-key.nvim'
+else
+  Plug 'liuchengxu/vim-which-key'
+endif
+
+" edit with sudo
+Plug 'lambdalisue/suda.vim'
+
+" 現在のカーソル位置のコンテキストによって filetype を切り換える為のプラグイン
+Plug 'osyo-manga/vim-precious'
+
+" カーソル位置のコンテキストのftを判定するライブラリ
+Plug 'Shougo/context_filetype.vim'
+
+call plug#end()
+
+" onedark
+autocmd config VimEnter * nested
+      \ set background=dark |
+      \ colorscheme onedark
+
+
+" Undotree: visualize undo-tree
+" ----------------------------------------
+
+" toggle Undotree (Sidebar Log)
+nnoremap sl :UndotreeToggle<CR>
+
+" buffer init hook
+function! g:Undotree_CustomMap() abort
+  nmap <buffer> ? <Plug>UndoreeHelp
+  " <Plug>UndotreeFocusTarget is equal to UndotreeClose in my config
+  nmap <buffer><nowait> q <Plug>UndotreeClose
+  nmap <buffer><nowait> <Esc> <Plug>UndotreeClose
+  nmap <buffer> <CR> <Plug>UndotreeClose
+  nunmap <buffer> <Tab>
+  " remove <Plug>UndotreeClearHistory
+  nunmap <buffer> C
+  " 't' for 'Timestamp'
+  nmap <buffer> t <Plug>UndotreeTimestampToggle
+  " 'd' for 'Diff'
+  nmap <buffer> d <Plug>UndotreeDiffToggle
+  nmap <buffer> <Up> <Plug>UndotreeNextState
+  nmap <buffer> <Down> <Plug>UndotreePreviousState
+  nmap <buffer> <S-Up> <Plug>UndotreeNextSavedState
+  nmap <buffer> <S-Down> <Plug>UndotreePreviousSavedState
+  " 'u' for <Plug>UndotreeUndo interferes with 'u' for 'Up'
+  nunmap <buffer> u
+  nmap <buffer> l <Plug>UndotreeUndo
+  nmap <buffer> <C-r> <Plug>UndotreeRedo
+  " Move to current state
+  nmap <buffer> % <Plug>UndotreeEnter
+
+  " automaticly close on WinLeave
+  augroup undotree-autoclose
+    autocmd!
+    autocmd InsertEnter * UndotreeHide
+  augroup END
+
+endfunction
+
+let g:undotree_SplitWidth = g:sidebar_width
+
+" tree at the left, diff at the under
+let g:undotree_WindowLayout = 2
+
+" focus on open
+let g:undotree_SetFocusWhenToggle = v:true
+
+" clean leftover suda window from last session
+"
+autocmd config SessionLoadPost * silent! bdelete undotree
+
+
+" indentline
+let g:indentLine_char_list = ['┊']
+
+" vim-sandwich
+let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
+
+" rainbow
+" 抵抗のカラーコード
+let s:colorcode_gui = [
+      \ '#9a4040', '#ff5e5e', '#ffaa77', '#dddd77',
+      \ '#80ee80', '#66bbff', '#da6bda', '#afafaf', '#f0f0f0'
+      \ ]
+let s:colorcode_cterm = [ 6, 12, 6, 14, 10, 9, 13, 7, 15]
+
+let g:rainbow_active = 1 "set to 0 if you want to enable it later via :RainbowToggle
+let g:rainbow_conf = {
+      \ 'guifgs' : s:colorcode_gui,
+      \ 'ctermfgs' : s:colorcode_cterm,
+      \ }
+augroup config Colorschemes * RainbowToggleOn
+
+" vim-hexokinase
+let g:Hexokinase_highlighters = ['foreground']
+
+" tcomment_vim
+let g:tcomment#blank_lines = 0
+
+" vim-easy-align
+" Start interactive EasyAlign in visual mode (e.g. vipga)
+xmap ga <Plug>(LiveEasyAlign)
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(LiveEasyAlign)
+
+" lexima.vim
+let g:lexima_enable_basic_rules = v:true
+let g:lexima_enable_newline_rules = v:true
+let g:lexima_enable_endwise_rules = v:true
+" use '<Enter>' as <Esc>
+let g:lexima_map_escape = 'qq'
+
+if has("nvim")
+  noremap ? :WhichKey<CR>
+
+  lua << EOF
+require('which-key').setup {
+    -- your configuration comes here
+    -- or leave it empty to use the default settings
+    -- refer to the configuration section below
+    plugins = {
+      spelling = {
+        enabled = true, -- enabling this will show WhichKey when pressing z= to select spelling suggestions
+      },
+    },
+  }
+EOF
+endif
+
+" suda.vim
+let g:suda_smart_edit = 1
+" clean leftover suda window from last session
+autocmd config SessionLoadPost * silent! bdelete suda
+
+" vim-precious
+" NORMALモードのカーソル移動中に頻繁に切り替わるとうざいのでデフォは無効化しておく(helpは例外)
+let g:precious_enable_switch_CursorMoved = { '*': 0, 'help': 1, 'git': 1}
+" INSERTモードのON／OFFに合わせてトグル
+autocmd config InsertEnter * PreciousSwitch
+autocmd config InsertLeave * PreciousReset
 
 else
 
-" yank from c:lipboard
-set clipboard=unnamedplus
+" Plugins
+call plug#begin()
 
-"文字コードをUTF-8に設定
-set fenc=utf-8
-set encoding=utf8
+" deal with camelCase and snake_case
+Plug 'chaoren/vim-wordmotion'
 
-" set <Leader> key
-let mapleader = "\<Space>"
+" align things like =
+Plug 'junegunn/vim-easy-align'
 
-" normal modeでEnterで1行入力
-nnoremap <CR> o<Esc>
+" surround textobjects with parentheses
+Plug 'machakann/vim-sandwich'
 
-" 折り返し時に表示行単位での移動できるようにする
-noremap <Up> g<Up>
-noremap <Down> g<Down>
+call plug#end()
 
-" <C-Up|Down>でページめくり
-nnoremap <unique> <C-Up> <C-u>
-nnoremap <unique> <C-Down> <C-d>
+" vim-sandwich
+let g:sandwich#recipes = deepcopy(g:sandwich#default_recipes)
 
-" ESC連打でハイライト解除
-nnoremap <unique><silent> <Esc> <CMD>let @/ = '' <BAR> cclose<CR>
-
-" visual / で選択中のものを検索、* でハイライト
-vnoremap / y/\V<C-R>=escape(@",'/\')<CR><CR>
-vnoremap * y/\V<C-R>=escape(@",'/\')<CR><CR><CR>
-nnoremap * */<Up><CR>
-
-" " バックアップファイルを作らない
-" set nobackup
-set backup
-" " スワップファイルを作らない
-" set noswapfile
-set swapfile
-if has('nvim')
-  execute 'set backupdir=' . stdpath('data') . '/backup'
-  execute 'set directory=' . stdpath('data') . '/backup'
-else
-  set backupdir=~/.vim/backup
-  set directory=~/.vim/backup
-endif
-
-" 編集中のファイルが変更されたら自動で読み直す
-set autoread
-" バッファが編集中でもその他のファイルを開けるように
-set hidden
-" 入力中のコマンドをステータスに表示する
-set showcmd
-
-" 検索文字列入力時に順次対象文字列にヒットさせる
-set incsearch
-" 検索時に最後まで行ったら最初に戻る
-set wrapscan
-" 検索語をハイライト表示
-set hlsearch
-
-" ignore Japanese
-set spelllang=en,cjk
-
-" terminal関係
-" shellをzshに
-set shell=zsh
-
-" undo履歴保持
-if has('persistent_undo')
-  let s:undo_path=stdpath('data') . '/undo'
-  exe 'set undodir=' .. s:undo_path
-  set undofile
-endif
-
-" config augroup for configs in dein
-augroup config | autocmd! | augroup END
-
-" cleanup on leave
-autocmd config VimLeave * if &buftype == 'nofile' | execute 'bdelete '  . expand('<afile>') | endif
-
-" sessions settings
-set sessionoptions=buffers,curdir,folds,resize,tabpages,terminal,winsize
-
-" Required:
-let g:dein_dir = stdpath('data') . '/dein_vscode'
-
-let s:dein_repo_dir = g:dein_dir . '/repos/github.com/Shougo/dein.vim'
-
-" なければgit clone
-if !isdirectory(s:dein_repo_dir)
-  execute '!git clone https://github.com/Shougo/dein.vim' s:dein_repo_dir
-endif
-
-execute 'set runtimepath+=' . s:dein_repo_dir
-
-call dein#begin(g:dein_dir)
-
-" manage packages with toml
-" reset augroup
-let s:toml_file = stdpath('config') . '/dein_vscode.toml'
-call dein#load_toml(s:toml_file)
-
-" Required:
-call dein#end()
-
-" If you want to install not installed plugins on startup.
-if dein#check_install()
-  call dein#install()
-endif
-
-" remove packages
-call map(dein#check_clean(), { _, val -> delete(val, 'rf') })
 
 endif
 
